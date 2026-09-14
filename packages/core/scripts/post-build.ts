@@ -47,7 +47,7 @@ async function main() {
     packageReadme = replaceExactlyOnce(
       packageReadme,
       "[许可证与署名说明](./docs/guide/license.md)",
-      "[许可证与署名说明](https://keryin-dev.github.io/uni-tree-view/guide/license)",
+      "[许可证与署名说明](https://uni-tree-view.keryin.top/guide/license)",
       "README license link"
     );
 

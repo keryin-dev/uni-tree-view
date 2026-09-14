@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        本组件以「移动端体积和性能敏感」为设计约束，超出树组件核心职责的能力（如搜索框、弹窗容器）建议组合现有组件库实现，详见[介绍](https://keryin-dev.github.io/uni-tree-view/guide/introduction)。
+        本组件以「移动端体积和性能敏感」为设计约束，超出树组件核心职责的能力（如搜索框、弹窗容器）建议组合现有组件库实现，详见[介绍](https://uni-tree-view.keryin.top/guide/introduction)。
 
   - type: textarea
     id: scenario

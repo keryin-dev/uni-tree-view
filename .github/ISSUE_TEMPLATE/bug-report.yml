@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        提交前请先阅读[常见问题](https://keryin-dev.github.io/uni-tree-view/guide/faq)，并确认使用的是最新版本。
+        提交前请先阅读[常见问题](https://uni-tree-view.keryin.top/guide/faq)，并确认使用的是最新版本。
 
   - type: input
     id: version
