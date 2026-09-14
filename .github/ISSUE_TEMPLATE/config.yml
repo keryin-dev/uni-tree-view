@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: 📖 文档
-    url: https://ofreshman.github.io/uni-tree-view/
+    url: https://keryin-dev.github.io/uni-tree-view/
     about: 安装、API、示例和常见问题
   - name: 💬 讨论
-    url: https://github.com/OFreshman/uni-tree-view/discussions
+    url: https://github.com/keryin-dev/uni-tree-view/discussions
     about: 使用疑问、想法交流请到 Discussions

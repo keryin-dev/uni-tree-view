@@ -2,7 +2,7 @@
 
 ## 1.0 的兼容性边界
 
-当前已发布版本以 npm 和 [CHANGELOG](https://github.com/OFreshman/uni-tree-view/blob/main/CHANGELOG.md) 为准。`1.0.0` 起，公开能力按语义化版本管理：补丁版本修复问题，次版本增加兼容能力，主版本才引入需要迁移的变化。
+当前已发布版本以 npm 和 [CHANGELOG](https://github.com/keryin-dev/uni-tree-view/blob/main/CHANGELOG.md) 为准。`1.0.0` 起，公开能力按语义化版本管理：补丁版本修复问题，次版本增加兼容能力，主版本才引入需要迁移的变化。
 
 公开约定包括：
 
@@ -60,7 +60,7 @@ pnpm pack:npm
 
 ## 开发检查与版本发布
 
-日常提交与发布是两条流程。提交前按变更范围选择检查，详见 [贡献指南](https://github.com/OFreshman/uni-tree-view/blob/main/CONTRIBUTING.md#提交前检查)；纯文案勘误不需要完整构建。
+日常提交与发布是两条流程。提交前按变更范围选择检查，详见 [贡献指南](https://github.com/keryin-dev/uni-tree-view/blob/main/CONTRIBUTING.md#提交前检查)；纯文案勘误不需要完整构建。
 
 需要完整本地校验时，只运行：
 

@@ -4,14 +4,14 @@
   "version": "0.6.4",
   "packageManager": "pnpm@10.11.0",
   "description": "适用于 uni-app 与 Vue 3 的跨平台树形组件，支持单选、多选、筛选、懒加载和虚拟列表",
-  "author": "OFreshman <415561402@qq.com>",
+  "author": "keryin-dev <415561402@qq.com>",
   "license": "MIT",
-  "homepage": "https://ofreshman.github.io/uni-tree-view/",
+  "homepage": "https://keryin-dev.github.io/uni-tree-view/",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/OFreshman/uni-tree-view.git"
+    "url": "git+https://github.com/keryin-dev/uni-tree-view.git"
   },
-  "bugs": "https://github.com/OFreshman/uni-tree-view/issues",
+  "bugs": "https://github.com/keryin-dev/uni-tree-view/issues",
   "keywords": [
     "uni-tree-view",
     "uni-app",

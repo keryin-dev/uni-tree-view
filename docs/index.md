@@ -21,7 +21,7 @@ hero:
       link: /apis/props
     - theme: alt
       text: GitHub
-      link: https://github.com/OFreshman/uni-tree-view
+      link: https://github.com/keryin-dev/uni-tree-view
 
 features:
   - icon: 🌲

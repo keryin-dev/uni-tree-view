@@ -211,4 +211,4 @@ function onError({ node, error }) {
 
 ## 还有其他问题？
 
-提交 [Issue](https://github.com/OFreshman/uni-tree-view/issues) 时，请附上**最小复现示例**，并说明运行平台、uni-app 版本、数据样例、期望行为和实际行为。
+提交 [Issue](https://github.com/keryin-dev/uni-tree-view/issues) 时，请附上**最小复现示例**，并说明运行平台、uni-app 版本、数据样例、期望行为和实际行为。

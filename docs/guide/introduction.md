@@ -9,7 +9,7 @@
 - H5
 
 ::: tip 文档站入口
-文档站双线部署，内容原则上保持一致：主入口 [GitHub Pages](https://ofreshman.github.io/uni-tree-view/)；访问较慢时可切换到 [Netlify 镜像](https://uni-tree-view.netlify.app/)。
+文档站双线部署，内容原则上保持一致：主入口 [GitHub Pages](https://keryin-dev.github.io/uni-tree-view/)；访问较慢时可切换到 [Netlify 镜像](https://uni-tree-view.netlify.app/)。
 :::
 
 ## 特性

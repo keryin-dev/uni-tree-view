@@ -4,7 +4,7 @@
   "version": "0.6.4",
   "packageManager": "pnpm@10.11.0",
   "description": "uni-tree-view 跨平台示例与开发调试工程",
-  "author": "OFreshman <415561402@qq.com>",
+  "author": "keryin-dev <415561402@qq.com>",
   "license": "MIT",
   "keywords": [
     "uni-tree-view",

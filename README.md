@@ -5,18 +5,18 @@
 </p>
 
 [![npm version](https://img.shields.io/npm/v/uni-tree-view.svg)](https://www.npmjs.com/package/uni-tree-view)
-[![CI](https://github.com/OFreshman/uni-tree-view/actions/workflows/ci.yml/badge.svg)](https://github.com/OFreshman/uni-tree-view/actions/workflows/ci.yml)
+[![CI](https://github.com/keryin-dev/uni-tree-view/actions/workflows/ci.yml/badge.svg)](https://github.com/keryin-dev/uni-tree-view/actions/workflows/ci.yml)
 [![license](https://img.shields.io/npm/l/uni-tree-view.svg)](./LICENSE)
 
 适用于 uni-app + Vue 3 的跨端树形列表/选择组件，一套代码运行在微信小程序、支付宝小程序和 H5。
 
-**📖 [完整文档](https://ofreshman.github.io/uni-tree-view/)** · [在线演示](https://ofreshman.github.io/uni-tree-view/ui/index.html#/) · [快速上手](https://ofreshman.github.io/uni-tree-view/guide/quick-start) · [API 参考](https://ofreshman.github.io/uni-tree-view/apis/props) · [常见问题](https://ofreshman.github.io/uni-tree-view/guide/faq)
+**📖 [完整文档](https://keryin-dev.github.io/uni-tree-view/)** · [在线演示](https://keryin-dev.github.io/uni-tree-view/ui/index.html#/) · [快速上手](https://keryin-dev.github.io/uni-tree-view/guide/quick-start) · [API 参考](https://keryin-dev.github.io/uni-tree-view/apis/props) · [常见问题](https://keryin-dev.github.io/uni-tree-view/guide/faq)
 
 > 文档站双线部署，内容原则上保持一致：主入口为 GitHub Pages（上方链接）；访问较慢时可切换到 [Netlify 镜像](https://uni-tree-view.netlify.app/)。
 
-> 使用 AI Coding 工具时，可将 [llms.txt](https://ofreshman.github.io/uni-tree-view/llms.txt) 作为精简的文档导航入口。
+> 使用 AI Coding 工具时，可将 [llms.txt](https://keryin-dev.github.io/uni-tree-view/llms.txt) 作为精简的文档导航入口。
 
-> **版本与兼容性：** 当前发布版本以 npm 和 [CHANGELOG](https://github.com/OFreshman/uni-tree-view/blob/main/CHANGELOG.md) 为准。`1.0.0` 起按语义化版本维护公开 API；兼容性边界及最终组件体积的测量方式见[版本兼容性与组件体积](https://ofreshman.github.io/uni-tree-view/guide/versioning)。H5 已有构建和交互验证，微信/支付宝目前主要是构建验证，不代表所有真机都已验证。
+> **版本与兼容性：** 当前发布版本以 npm 和 [CHANGELOG](https://github.com/keryin-dev/uni-tree-view/blob/main/CHANGELOG.md) 为准。`1.0.0` 起按语义化版本维护公开 API；兼容性边界及最终组件体积的测量方式见[版本兼容性与组件体积](https://keryin-dev.github.io/uni-tree-view/guide/versioning)。H5 已有构建和交互验证，微信/支付宝目前主要是构建验证，不代表所有真机都已验证。
 
 ## 特性
 
@@ -33,7 +33,7 @@
 pnpm add uni-tree-view
 ```
 
-推荐使用 npm；也可以在 [DCloud 插件市场](https://ext.dcloud.net.cn/plugin?id=29379) 导入 `Uni Tree View`，插件按 `uni_modules` 规范发布，导入后位于 `uni_modules/keryin-tree-view`（CLI 工程为 `src/uni_modules/keryin-tree-view`）。两种方式的取舍见[安装说明](https://ofreshman.github.io/uni-tree-view/guide/installation)。
+推荐使用 npm；也可以在 [DCloud 插件市场](https://ext.dcloud.net.cn/plugin?id=29379) 导入 `Uni Tree View`，插件按 `uni_modules` 规范发布，导入后位于 `uni_modules/keryin-tree-view`（CLI 工程为 `src/uni_modules/keryin-tree-view`）。两种方式的取舍见[安装说明](https://keryin-dev.github.io/uni-tree-view/guide/installation)。
 
 > 插件市场迁移说明：插件市场自 `0.6.3` 起使用新的 [插件条目（id=29379）](https://ext.dcloud.net.cn/plugin?id=29379)。`0.6.2` 及更早版本可能来自旧条目，导入目录为 `uni_modules/KieranYin9527-tree`；如果本地仍有旧目录，请先删除，再导入 `uni_modules/keryin-tree-view`。npm 包不受影响。
 
@@ -134,7 +134,7 @@ function handleCheckChange({ keys }) {
 
 `tree-props` 只负责数据字段映射，不包含样式配置。
 
-完整的属性、事件、插槽和实例方法（Props / Events / Slots / Methods），以及懒加载与虚拟渲染示例，请见 **[文档站](https://ofreshman.github.io/uni-tree-view/)**。
+完整的属性、事件、插槽和实例方法（Props / Events / Slots / Methods），以及懒加载与虚拟渲染示例，请见 **[文档站](https://keryin-dev.github.io/uni-tree-view/)**。
 
 ## 平台兼容性
 
@@ -145,7 +145,7 @@ function handleCheckChange({ keys }) {
 | 支付宝小程序 | ✅ 构建验证 |
 | App / 其他小程序 | 理论可用，未充分验证 |
 
-点击反馈、内联图标和 `scroll-view` 虚拟滚动等实现说明，见 [平台兼容性文档](https://ofreshman.github.io/uni-tree-view/guide/platforms)。
+点击反馈、内联图标和 `scroll-view` 虚拟滚动等实现说明，见 [平台兼容性文档](https://keryin-dev.github.io/uni-tree-view/guide/platforms)。
 
 ## 开发
 
@@ -162,6 +162,6 @@ pnpm docs        # 本地文档站
 
 ## License
 
-本项目使用 [MIT](./LICENSE) 许可证，版权归 OFreshman 所有。再分发源码、构建产物或主要部分时，请保留版权声明和许可证全文；MIT 不要求在产品界面展示作者名。
+本项目使用 [MIT](./LICENSE) 许可证，版权归 keryin-dev 所有。再分发源码、构建产物或主要部分时，请保留版权声明和许可证全文；MIT 不要求在产品界面展示作者名。
 
 使用或改造时的保留要求、推荐署名格式和第三方许可说明，见 [许可证与署名说明](./docs/guide/license.md)。

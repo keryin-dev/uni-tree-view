@@ -35,19 +35,19 @@ async function main() {
     let packageReadme = replaceExactlyOnce(
       readme,
       "src=\"./assets/uni-tree-view-logo.svg\"",
-      "src=\"https://raw.githubusercontent.com/OFreshman/uni-tree-view/main/assets/uni-tree-view-logo.svg\"",
+      "src=\"https://raw.githubusercontent.com/keryin-dev/uni-tree-view/main/assets/uni-tree-view-logo.svg\"",
       "README logo source"
     );
     packageReadme = replaceExactlyOnce(
       packageReadme,
       "[CONTRIBUTING.md](./CONTRIBUTING.md)",
-      "[CONTRIBUTING.md](https://github.com/OFreshman/uni-tree-view/blob/main/CONTRIBUTING.md)",
+      "[CONTRIBUTING.md](https://github.com/keryin-dev/uni-tree-view/blob/main/CONTRIBUTING.md)",
       "README contributing link"
     );
     packageReadme = replaceExactlyOnce(
       packageReadme,
       "[许可证与署名说明](./docs/guide/license.md)",
-      "[许可证与署名说明](https://ofreshman.github.io/uni-tree-view/guide/license)",
+      "[许可证与署名说明](https://keryin-dev.github.io/uni-tree-view/guide/license)",
       "README license link"
     );
 
