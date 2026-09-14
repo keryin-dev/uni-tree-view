@@ -6,7 +6,7 @@ import process from "node:process";
 
 const root = process.cwd();
 const distDir = path.join(root, "docs", ".vitepress", "dist");
-const siteBase = normalizeBase(process.env.DOCS_BASE ?? "/uni-tree-view/");
+const siteBase = normalizeBase(process.env.DOCS_BASE ?? "/");
 const demoHref = `${siteBase}ui/index.html`;
 const demoIndex = path.join(distDir, "ui", "index.html");
 const homePage = path.join(distDir, "index.html");

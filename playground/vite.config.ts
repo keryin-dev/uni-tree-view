@@ -49,7 +49,8 @@ function buildPlugins(): PluginOption[] {
 }
 
 export default defineConfig(({ mode }) => {
-  const docsH5Base = process.env.PLAYGROUND_DOCS_BASE ?? "/uni-tree-view/ui/";
+  // docs 模式的产物挂在文档站的 ui/ 下，base 必须与文档站的 DOCS_BASE 对齐（默认根路径）
+  const docsH5Base = process.env.PLAYGROUND_DOCS_BASE ?? "/ui/";
   const h5Base = mode === "docs" ? docsH5Base : "/ui/";
 
   return {

@@ -5,9 +5,7 @@ publish = "docs/.vitepress/dist"
 [build.environment]
 NODE_VERSION = "22"
 PNPM_VERSION = "10.11.0"
-DOCS_BASE = "/"
 DOCS_SITE_URL = "https://uni-tree-view.netlify.app"
-PLAYGROUND_DOCS_BASE = "/ui/"
 
 [[redirects]]
 from = "/ui/*"

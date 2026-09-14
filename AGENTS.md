@@ -52,7 +52,7 @@
 
 - `uni-tree-view/resolver` 的最终导出位于 `packages/core/dist-resolver/index.*`。unbuild 会先生成 `dist-resolver/resolver/*`，随后 `packages/core/scripts/post-build.ts` 再整理到根级入口；不要因中间阶段的缺失警告直接修改 exports，应检查命令退出码和最终文件。
 - `pnpm docs` 通过 `VITE_DEMO_URL` 连接本地 playground。`pnpm docs:build` 先将 H5 demo 生成到 `docs/public/ui`，再构建 VitePress，并由 `pnpm docs:check` 校验在线演示入口、iframe 和静态资源。
-- 修改文档部署路径时，同时检查 `DOCS_BASE`、`PLAYGROUND_DOCS_BASE`、带 `index.html` 的静态入口及 Netlify/GitHub Pages 两种部署形态。
+- 文档站默认按根路径 `/` 构建：GitHub Pages 通过自定义域名 `uni-tree-view.keryin.top` 从根路径提供，Netlify 镜像同样在根路径。修改文档部署路径时，同时检查 `DOCS_BASE`、`PLAYGROUND_DOCS_BASE`、`DOCS_SITE_URL`、带 `index.html` 的静态入口及 Netlify/GitHub Pages 两种部署形态。
 - 不要手动编辑生成物，包括 `dist`、`dist-resolver`、`docs/public/ui`、`docs/.vitepress/dist`、`artifacts`、`coverage`、`playground/src/uni_modules` 和 playground 生成的类型文件。
 - 变更日志只维护根目录 `CHANGELOG.md`；`packages/core/CHANGELOG.md` 在 npm 打包前生成，不要手动编辑。
 - 根目录 `CHANGELOG.md` 的 `Unreleased` 段落由 `pnpm changelog:generate` 从提交标题生成。该段落一旦有内容，生成器会判定为 `keep` 并跳过本次全部提交（见 `scripts/changelog-utils.ts`），因此普通任务不要手写条目——把信息写进提交标题即可。

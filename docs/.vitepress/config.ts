@@ -38,10 +38,13 @@ function exampleItem(text: string, name: string): DefaultTheme.SidebarItem {
   return { text, link: `/examples/${name}`, collapsed: true, items };
 }
 
-const siteBase = process.env.DOCS_BASE ?? "/uni-tree-view/";
-// VitePress 会自动为站内链接补上 base；这里保持根相对路径，避免默认构建重复拼接 /uni-tree-view/。
+/* 文档站在 GitHub Pages（自定义域名 uni-tree-view.keryin.top）和 Netlify 上都从根路径提供，
+   默认按 "/" 构建；若要部署到 <user>.github.io/<repo>/ 这类子路径，用 DOCS_BASE、
+   PLAYGROUND_DOCS_BASE 和 DOCS_SITE_URL 覆盖，三者需保持一致（见 scripts/check-docs-build.ts） */
+const siteBase = process.env.DOCS_BASE ?? "/";
+// VitePress 会自动为站内链接补上 base；这里保持根相对路径，避免重复拼接 base。
 const demoLink = process.env.VITE_DEMO_URL ?? "/ui/index.html";
-const siteUrl = process.env.DOCS_SITE_URL ?? "https://keryin-dev.github.io/uni-tree-view";
+const siteUrl = process.env.DOCS_SITE_URL ?? "https://uni-tree-view.keryin.top";
 
 export default defineConfig({
   lang: "zh-CN",
