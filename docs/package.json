@@ -1,7 +1,7 @@
 {
   "name": "@uni-tree-view/docs",
   "type": "module",
-  "version": "0.6.4",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "vitepress dev",
