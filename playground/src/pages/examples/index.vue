@@ -1,12 +1,11 @@
 <template>
   <app-page>
     <view class="page">
+      <!-- 不用 wd-tabs 的 sticky：它会把导航包进 wd-sticky / wd-resize，后者叠在导航上的隐藏
+           scroll-view 在支付宝真机会抢占点击，吸顶改由下方样式的原生 position: sticky 实现 -->
       <wd-tabs
         v-model="activeTab"
-        :offset-top="-1"
-        custom-class="page__tabs"
-        custom-style="--wot-tabs-nav-bg: var(--wot-filled-oppo, #ffffff); --wot-tabs-nav-item-font-size: 14px;"
-        sticky>
+        custom-class="page__tabs">
         <!-- ==================== 选择模式 ==================== -->
         <wd-tab title="选择模式" name="selection">
           <view class="page__panel">
@@ -536,8 +535,23 @@ function confirmPopup() {
   font-weight: 600;
 }
 
+// 非 sticky 模式下 wd-tabs 根节点不绑定 custom-style，主题变量改由类名下发
+:deep(.page__tabs) {
+  --wot-tabs-nav-bg: var(--wot-filled-oppo, #ffffff);
+  --wot-tabs-nav-item-font-size: 14px;
+}
+
+// H5 的页面滚动区域在导航栏下方，需要让出 --window-top；小程序中该变量不存在，回退为 0
 :deep(.page__tabs .wd-tabs__nav) {
+  position: sticky;
+  top: var(--window-top, 0);
+  z-index: 10;
   box-shadow: 0 1px 0 var(--wot-border-light, #e4e7ec);
+}
+
+// 点击统一落在绑定 tap 的 nav-item 上，避免支付宝真机点中 text 时切换不灵敏
+:deep(.page__tabs .wd-tabs__nav-item-text) {
+  pointer-events: none;
 }
 
 // 弹窗
