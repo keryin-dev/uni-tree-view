@@ -2,7 +2,7 @@
   "name": "uni-tree-view",
   "type": "module",
   "version": "1.0.0",
-  "packageManager": "pnpm@10.11.0",
+  "packageManager": "pnpm@11.27.1",
   "description": "适用于 uni-app 与 Vue 3 的跨平台树形组件，支持单选、多选、筛选、懒加载和虚拟列表",
   "author": "keryin-dev <415561402@qq.com>",
   "license": "MIT",

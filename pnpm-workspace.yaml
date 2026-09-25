@@ -2,6 +2,13 @@ packages:
   - docs
   - playground
   - packages/**
+# pnpm 11 以 allowBuilds 取代 onlyBuiltDependencies，未列出的依赖构建脚本会导致安装失败。
+# @parcel/watcher 与 core-js 的脚本仅用于源码编译兜底和打印提示，无需执行。
+allowBuilds:
+  '@parcel/watcher': false
+  core-js: false
+  esbuild: true
+  simple-git-hooks: true
 catalogs:
   build:
     '@dcloudio/vite-plugin-uni': 3.0.0-4070620250821001
@@ -71,8 +78,3 @@ catalogs:
     '@types/node': ^24.0.12
   utils:
     lodash-es: ^4.17.21
-onlyBuiltDependencies:
-  - core-js
-  - esbuild
-  - simple-git-hooks
-  - vue-demi
