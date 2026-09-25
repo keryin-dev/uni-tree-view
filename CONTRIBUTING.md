@@ -20,8 +20,11 @@
 pnpm install        # 安装依赖
 pnpm play           # 启动 H5 playground
 pnpm play:mp-weixin # 微信小程序调试（需微信开发者工具）
+pnpm play:mp-alipay # 支付宝小程序调试（需支付宝小程序开发者工具）
 pnpm docs           # 启动文档站
 ```
+
+小程序调试命令会监听改动并持续编译，在对应开发者工具中导入 `playground/dist/dev/mp-weixin` 或 `playground/dist/dev/mp-alipay`（appid 为空，选择测试号即可）。`pnpm check:platforms` 的生产构建输出在 `playground/dist/build/` 下，也可按同样方式导入预览；`artifacts/component-size/` 只是体积对照用的最小工程，不用于调试。
 
 ## 目录结构
 
