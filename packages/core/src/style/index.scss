@@ -4,8 +4,8 @@
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  min-height: 48rpx;
-  padding-right: 24rpx;
+  min-height: 24px;
+  padding-right: 12px;
   color: #1f2937;
 
   // hover-class 按压反馈，兼容微信/支付宝小程序与 H5
@@ -49,26 +49,26 @@
   }
 
   &__arrow-placeholder {
-    flex: 0 0 40rpx;
-    width: 40rpx;
-    height: 40rpx;
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
   }
 
   &__arrow-icon {
     position: relative;
-    flex: 0 0 40rpx;
+    flex: 0 0 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40rpx;
-    height: 40rpx;
+    width: 20px;
+    height: 20px;
     &::after {
       position: relative;
       z-index: 1;
       overflow: hidden;
       /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
       font-family: "uni-tree-iconfont" !important;
-      font-size: 32rpx;
+      font-size: 16px;
       font-style: normal;
       color: #999999;
       transition: transform 0.2s ease;
@@ -103,12 +103,12 @@
   }
 
   &__checkbox {
-    flex: 0 0 48rpx;
+    flex: 0 0 24px;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 48rpx;
-    height: 48rpx;
+    width: 24px;
+    height: 24px;
     overflow: hidden;
 
     &.is-disabled {
@@ -120,8 +120,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 40rpx;
-      height: 40rpx;
+      width: 20px;
+      height: 20px;
 
       &::after {
         position: relative;
@@ -131,7 +131,7 @@
         overflow: hidden;
         /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
         font-family: "uni-tree-iconfont" !important;
-        font-size: 36rpx;
+        font-size: 18px;
         font-style: normal;
         transition: color 0.2s ease;
         -webkit-font-smoothing: antialiased;
@@ -173,10 +173,10 @@
 .utv-tree-node-label {
   flex: 1;
   min-width: 0;
-  padding: 0 8rpx;
+  padding: 0 4px;
   overflow: hidden;
-  font-size: 28rpx;
-  line-height: 40rpx;
+  font-size: 14px;
+  line-height: 20px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -204,42 +204,42 @@
 
 .utv-tree-node-icon {
   flex: 0 0 auto;
-  padding-left: 16rpx;
-  font-size: 28rpx;
-  line-height: 40rpx;
+  padding-left: 8px;
+  font-size: 14px;
+  line-height: 20px;
 }
 
 .utv-tree-node-icon + .utv-tree-node-main .utv-tree-node-label {
-  padding-left: 8rpx;
+  padding-left: 4px;
 }
 
 .utv-tree-node-append {
   flex: 0 0 auto;
   max-width: 40%;
-  padding-left: 16rpx;
+  padding-left: 8px;
   overflow: hidden;
   color: #667085;
-  font-size: 24rpx;
-  line-height: 36rpx;
+  font-size: 12px;
+  line-height: 18px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .utv-tree-node-path {
-  padding: 0 16rpx;
+  padding: 0 8px;
   overflow: hidden;
   color: #98a2b3;
-  font-size: 22rpx;
-  line-height: 32rpx;
+  font-size: 12px;
+  line-height: 16px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .utv-tree-empty {
-  padding: 64rpx 24rpx;
+  padding: 32px 12px;
   color: #98a2b3;
-  font-size: 28rpx;
-  line-height: 40rpx;
+  font-size: 14px;
+  line-height: 20px;
   text-align: center;
 }
 

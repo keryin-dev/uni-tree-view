@@ -23,7 +23,7 @@
         <template #icon="{ node }">
           <wd-icon
             :name="node.isLeaf ? 'user' : 'folder'"
-            size="32rpx"
+            size="16px"
             color="#299764"></wd-icon>
         </template>
         <template #label="{ node, data }">

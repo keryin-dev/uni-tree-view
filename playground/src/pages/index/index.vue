@@ -41,7 +41,7 @@
 
         <wd-search
           v-model="filterValue"
-          custom-style="--wot-search-padding: 20rpx 0 0; --wot-search-bg: transparent;"
+          custom-style="--wot-search-padding: 10px 0 0; --wot-search-bg: transparent;"
           placeholder="搜索部门或成员"
           hide-cancel
           placeholder-left></wd-search>
@@ -141,7 +141,7 @@
         <view v-if="showLargeTree" class="demo-tree-frame page__large-tree">
           <wd-search
             v-model="largeFilterValue"
-            custom-style="--wot-search-padding: 0 0 20rpx; --wot-search-bg: transparent;"
+            custom-style="--wot-search-padding: 0 0 10px; --wot-search-bg: transparent;"
             placeholder="在万级节点中筛选"
             hide-cancel
             placeholder-left></wd-search>
@@ -211,7 +211,7 @@
         </view>
       </view>
 
-      <wd-gap height="48rpx" bg-color="transparent"></wd-gap>
+      <wd-gap height="24px" bg-color="transparent"></wd-gap>
     </view>
   </app-page>
 </template>
@@ -382,7 +382,7 @@ function handleLazyVirtualLoadError(payload: TreeLoadErrorPayload) {
 <style scoped lang='scss'>
 .page {
   min-height: 100vh;
-  padding: 24rpx 24rpx 0;
+  padding: 12px 12px 0;
   background: var(--wot-filled-bottom, #f6f7fb);
 }
 
@@ -390,8 +390,8 @@ function handleLazyVirtualLoadError(payload: TreeLoadErrorPayload) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24rpx;
-  padding: 24rpx 8rpx 32rpx;
+  gap: 12px;
+  padding: 12px 4px 16px;
 }
 
 .page__hero-main {
@@ -399,13 +399,13 @@ function handleLazyVirtualLoadError(payload: TreeLoadErrorPayload) {
   flex: 1;
   align-items: center;
   min-width: 0;
-  gap: 20rpx;
+  gap: 10px;
 }
 
 .page__logo {
   flex: none;
-  width: 96rpx;
-  height: 96rpx;
+  width: 48px;
+  height: 48px;
 }
 
 .page__title,
@@ -415,19 +415,19 @@ function handleLazyVirtualLoadError(payload: TreeLoadErrorPayload) {
 
 .page__title {
   color: var(--wot-text-main, #111827);
-  font-size: 44rpx;
+  font-size: 22px;
   font-weight: 700;
-  letter-spacing: 1rpx;
+  letter-spacing: 1px;
 }
 
 .page__subtitle {
-  margin-top: 12rpx;
+  margin-top: 6px;
   color: var(--wot-text-auxiliary, #667085);
-  font-size: 26rpx;
+  font-size: 13px;
 }
 
 .page__virtual-card {
-  margin-top: 24rpx;
+  margin-top: 12px;
 }
 
 .page__large-tree {
@@ -439,6 +439,6 @@ function handleLazyVirtualLoadError(payload: TreeLoadErrorPayload) {
 }
 
 :deep(.page__cells) {
-  margin-top: 24rpx;
+  margin-top: 12px;
 }
 </style>

@@ -5,7 +5,7 @@
         v-model="activeTab"
         :offset-top="-1"
         custom-class="page__tabs"
-        custom-style="--wot-tabs-nav-bg: var(--wot-filled-oppo, #ffffff); --wot-tabs-nav-item-font-size: 28rpx;"
+        custom-style="--wot-tabs-nav-bg: var(--wot-filled-oppo, #ffffff); --wot-tabs-nav-item-font-size: 14px;"
         sticky>
         <!-- ==================== 选择模式 ==================== -->
         <wd-tab title="选择模式" name="selection">
@@ -180,7 +180,7 @@
                 <template #icon="{ node }">
                   <wd-icon
                     :name="node.isLeaf ? 'file' : 'folder'"
-                    size="34rpx"
+                    size="17px"
                     color="#299764"></wd-icon>
                 </template>
                 <template #label="{ node, data }">
@@ -286,7 +286,7 @@
           </wd-popup>
         </wd-tab>
       </wd-tabs>
-      <wd-gap height="48rpx" bg-color="transparent"></wd-gap>
+      <wd-gap height="24px" bg-color="transparent"></wd-gap>
     </view>
   </app-page>
 </template>
@@ -486,16 +486,16 @@ function confirmPopup() {
 }
 
 .page__panel {
-  padding: 24rpx;
+  padding: 12px;
 }
 
 .page__segment {
   display: flex;
-  gap: 6rpx;
-  padding: 6rpx;
-  margin: 20rpx 0 12rpx;
+  gap: 3px;
+  padding: 3px;
+  margin: 10px 0 6px;
   background: var(--wot-filled-content, #f2f3f5);
-  border-radius: 12rpx;
+  border-radius: 6px;
 }
 
 .page__segment-item {
@@ -504,11 +504,11 @@ function confirmPopup() {
   align-items: center;
   justify-content: center;
   min-width: 0;
-  height: 56rpx;
+  height: 28px;
   color: var(--wot-text-secondary, #4b5563);
-  font-size: 26rpx;
+  font-size: 13px;
   line-height: 1;
-  border-radius: 8rpx;
+  border-radius: 4px;
   box-sizing: border-box;
 }
 
@@ -516,7 +516,7 @@ function confirmPopup() {
   color: var(--wot-primary-6, #299764);
   font-weight: 600;
   background: var(--wot-filled-oppo, #ffffff);
-  box-shadow: 0 2rpx 8rpx rgba(16, 24, 40, 0.08);
+  box-shadow: 0 1px 4px rgba(16, 24, 40, 0.08);
 }
 
 .page__segment-label {
@@ -527,7 +527,7 @@ function confirmPopup() {
 
 .page__slot-label {
   display: flex;
-  gap: 12rpx;
+  gap: 6px;
   align-items: center;
   min-width: 0;
 }
@@ -537,42 +537,42 @@ function confirmPopup() {
 }
 
 :deep(.page__tabs .wd-tabs__nav) {
-  box-shadow: 0 1rpx 0 var(--wot-border-light, #e4e7ec);
+  box-shadow: 0 1px 0 var(--wot-border-light, #e4e7ec);
 }
 
 // 弹窗
 :deep(.page__popup) {
-  border-radius: 32rpx 32rpx 0 0;
+  border-radius: 16px 16px 0 0;
 }
 
 .page__popup-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 28rpx 32rpx;
-  border-bottom: 1rpx solid var(--wot-border-light, #e4e7ec);
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--wot-border-light, #e4e7ec);
 }
 
 .page__popup-title {
   color: var(--wot-text-main, #111827);
-  font-size: 30rpx;
+  font-size: 15px;
   font-weight: 600;
 }
 
 .page__popup-cancel {
   color: var(--wot-text-auxiliary, #667085);
-  font-size: 28rpx;
+  font-size: 14px;
 }
 
 .page__popup-confirm {
   color: var(--wot-primary-6, #299764);
-  font-size: 28rpx;
+  font-size: 14px;
   font-weight: 600;
 }
 
 .page__popup-body {
   height: 56vh;
-  padding: 8rpx 0;
+  padding: 4px 0;
   overflow: hidden;
 }
 </style>

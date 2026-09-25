@@ -100,15 +100,15 @@ onLoad((options) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 104rpx;
-  padding: 0 26rpx;
+  height: 52px;
+  padding: 0 13px;
   background: #fbfdfc;
-  border-bottom: 1rpx solid rgba(22, 52, 37, 0.08);
+  border-bottom: 1px solid rgba(22, 52, 37, 0.08);
 }
 
 .docs-preview-header__brand {
   display: flex;
-  gap: 16rpx;
+  gap: 8px;
   align-items: center;
   min-width: 0;
 }
@@ -116,8 +116,8 @@ onLoad((options) => {
 .docs-preview-header__logo {
   display: block;
   flex: 0 0 auto;
-  width: 56rpx;
-  height: 56rpx;
+  width: 28px;
+  height: 28px;
 }
 
 .docs-preview-header__copy {
@@ -127,41 +127,41 @@ onLoad((options) => {
 .docs-preview-header__title {
   overflow: hidden;
   color: #16241c;
-  font-size: 26rpx;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: -0.3rpx;
-  line-height: 33rpx;
+  letter-spacing: -0.1px;
+  line-height: 17px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .docs-preview-header__description {
-  margin-top: 3rpx;
+  margin-top: 2px;
   color: #82908a;
-  font-size: 18rpx;
-  line-height: 24rpx;
-  letter-spacing: 2rpx;
+  font-size: 10px;
+  line-height: 12px;
+  letter-spacing: 1px;
 }
 
 .docs-preview-header__live {
   display: flex;
   flex: 0 0 auto;
-  gap: 9rpx;
+  gap: 5px;
   align-items: center;
-  padding: 7rpx 14rpx;
+  padding: 4px 7px;
   color: #1f7850;
   font-family: var(--font-mono-global);
-  font-size: 16rpx;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 2.5rpx;
+  letter-spacing: 1px;
   background: transparent;
-  border: 1rpx solid rgba(41, 151, 100, 0.32);
-  border-radius: 999rpx;
+  border: 1px solid rgba(41, 151, 100, 0.32);
+  border-radius: 500px;
 }
 
 .docs-preview-header__live-dot {
-  width: 8rpx;
-  height: 8rpx;
+  width: 4px;
+  height: 4px;
   background: #2ca76c;
   border-radius: 50%;
   animation: DocsLivePulse 2.4s ease-in-out infinite;
@@ -171,21 +171,21 @@ onLoad((options) => {
   position: relative;
   z-index: 1;
   box-sizing: border-box;
-  height: calc(100vh - 104rpx);
+  height: calc(100vh - 52px);
 }
 
 .docs-preview-scene {
-  padding: 22rpx 22rpx 46rpx;
+  padding: 11px 11px 23px;
   animation: DocsSceneEnter 0.28s ease both;
 }
 
 /* 场景卡：墨绿平色，信息按"眉题/序号 → 标题 → 说明 → 标签"分层，
    不做渐变与装饰图形，靠层次与留白立住 */
 .docs-preview-intro {
-  padding: 26rpx 26rpx 24rpx;
+  padding: 13px 13px 12px;
   color: #fff;
   background: #142e21;
-  border-radius: 18rpx;
+  border-radius: 9px;
 }
 
 .docs-preview-intro__topline {
@@ -198,10 +198,10 @@ onLoad((options) => {
 .docs-preview-intro__index {
   color: #7fbf9d;
   font-family: var(--font-mono-global);
-  font-size: 16rpx;
+  font-size: 10px;
   font-weight: 600;
-  line-height: 24rpx;
-  letter-spacing: 2.2rpx;
+  line-height: 12px;
+  letter-spacing: 1px;
 }
 
 .docs-preview-intro__index {
@@ -210,42 +210,42 @@ onLoad((options) => {
 }
 
 .docs-preview-intro__title {
-  margin-top: 12rpx;
-  font-size: 33rpx;
+  margin-top: 6px;
+  font-size: 17px;
   font-weight: 750;
-  line-height: 43rpx;
-  letter-spacing: -0.5rpx;
+  line-height: 22px;
+  letter-spacing: -0.2px;
 }
 
 .docs-preview-intro__description {
   max-width: 92%;
-  margin-top: 8rpx;
+  margin-top: 4px;
   color: rgba(255, 255, 255, 0.68);
-  font-size: 20rpx;
-  line-height: 31rpx;
+  font-size: 10px;
+  line-height: 16px;
 }
 
 .docs-preview-intro__tags {
   display: flex;
-  gap: 9rpx;
-  margin-top: 19rpx;
-  padding-top: 17rpx;
-  border-top: 1rpx solid rgba(255, 255, 255, 0.12);
+  gap: 5px;
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .docs-preview-intro__tag {
-  padding: 4rpx 12rpx;
+  padding: 2px 6px;
   color: rgba(255, 255, 255, 0.78);
-  font-size: 16rpx;
-  line-height: 24rpx;
-  border: 1rpx solid rgba(255, 255, 255, 0.18);
-  border-radius: 8rpx;
+  font-size: 10px;
+  line-height: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
 }
 
 @keyframes DocsSceneEnter {
   0% {
     opacity: 0;
-    transform: translateY(8rpx);
+    transform: translateY(4px);
   }
 
   100% {
@@ -261,7 +261,7 @@ onLoad((options) => {
   }
 
   50% {
-    box-shadow: 0 0 0 6rpx rgba(44, 167, 108, 0);
+    box-shadow: 0 0 0 3px rgba(44, 167, 108, 0);
   }
 }
 

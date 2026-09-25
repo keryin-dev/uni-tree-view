@@ -168,7 +168,7 @@ export interface UniTreeViewProps {
   packDisabledKey?: boolean;
   /** Custom class name added to every node row. */
   nodeClass?: string;
-  /** Tree item indent in rpx. */
+  /** Tree item indent in px. */
   indent?: number;
   /** Selection control placement. */
   selectionPlacement?: "left" | "right";

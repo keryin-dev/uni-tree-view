@@ -3,19 +3,19 @@
 // 通过 App.vue 全局引入，首页与 examples 页共用同一套视觉结构
 
 .demo-card {
-  padding: 24rpx;
+  padding: 12px;
   background: var(--wot-filled-oppo, #ffffff);
-  border-radius: 24rpx;
-  box-shadow: 0 2rpx 12rpx rgba(16, 24, 40, 0.04);
+  border-radius: 12px;
+  box-shadow: 0 1px 6px rgba(16, 24, 40, 0.04);
 
   & + .demo-card {
-    margin-top: 24rpx;
+    margin-top: 12px;
   }
 }
 
 .demo-card__header {
   display: flex;
-  gap: 24rpx;
+  gap: 12px;
   align-items: center;
   justify-content: space-between;
 }
@@ -28,31 +28,31 @@
 .demo-card__actions {
   display: flex;
   flex: 0 0 auto;
-  gap: 12rpx;
+  gap: 6px;
   align-items: center;
 }
 
 .demo-card__title {
   display: block;
   color: var(--wot-text-main, #111827);
-  font-size: 30rpx;
+  font-size: 15px;
   font-weight: 600;
 }
 
 .demo-card__desc {
   display: block;
-  margin-top: 8rpx;
+  margin-top: 4px;
   color: var(--wot-text-auxiliary, #667085);
-  font-size: 24rpx;
-  line-height: 36rpx;
+  font-size: 12px;
+  line-height: 18px;
 }
 
 .demo-toolbar {
   display: flex;
   flex-wrap: wrap;
-  gap: 12rpx;
+  gap: 6px;
   align-items: center;
-  margin-top: 20rpx;
+  margin-top: 10px;
 }
 
 .demo-toolbar__spacer {
@@ -62,20 +62,20 @@
 button.demo-chip {
   display: inline-flex;
   flex: 0 0 auto;
-  gap: 8rpx;
+  gap: 4px;
   align-items: center;
   justify-content: center;
   width: auto;
   min-width: auto;
-  height: 60rpx;
-  padding: 0 22rpx;
+  height: 30px;
+  padding: 0 11px;
   margin: 0;
   color: var(--wot-text-content, #374151);
-  font-size: 24rpx;
-  line-height: 58rpx;
+  font-size: 12px;
+  line-height: 29px;
   background: var(--wot-filled-oppo, #ffffff);
-  border: 1rpx solid var(--wot-border-light, #e4e7ec);
-  border-radius: 14rpx;
+  border: 1px solid var(--wot-border-light, #e4e7ec);
+  border-radius: 7px;
 
   &::after {
     display: none;
@@ -94,38 +94,38 @@ button.demo-chip {
 }
 
 .demo-chip__dot {
-  width: 10rpx;
-  height: 10rpx;
+  width: 5px;
+  height: 5px;
   background: #aab4ae;
   border-radius: 50%;
 }
 
 button.demo-chip.is-active .demo-chip__dot {
   background: var(--wot-primary-6, #299764);
-  box-shadow: 0 0 0 4rpx rgba(41, 151, 100, 0.12);
+  box-shadow: 0 0 0 2px rgba(41, 151, 100, 0.12);
 }
 
 // 主题色色板：色值由行内样式提供（background 与 color 同值，
 // 选中态的描边环通过 currentColor 拿到同一颜色）
 .demo-swatches {
   display: flex;
-  gap: 20rpx;
+  gap: 10px;
   align-items: center;
 }
 
 .demo-swatch {
   position: relative;
-  width: 40rpx;
-  height: 40rpx;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
 
   &.is-active::after {
     position: absolute;
-    top: -8rpx;
-    right: -8rpx;
-    bottom: -8rpx;
-    left: -8rpx;
-    border: 3rpx solid currentColor;
+    top: -4px;
+    right: -4px;
+    bottom: -4px;
+    left: -4px;
+    border: 2px solid currentColor;
     border-radius: 50%;
     content: "";
   }
@@ -134,22 +134,22 @@ button.demo-chip.is-active .demo-chip__dot {
 // 状态反馈条：每个案例底部统一的「结果 + 说明」区
 .demo-status {
   display: flex;
-  gap: 16rpx;
+  gap: 8px;
   align-items: flex-start;
-  padding: 20rpx 24rpx;
-  margin-top: 20rpx;
+  padding: 10px 12px;
+  margin-top: 10px;
   background: var(--wot-filled-bottom, #f6f7fb);
-  border-radius: 16rpx;
+  border-radius: 8px;
 }
 
 .demo-status__dot {
   flex: 0 0 auto;
-  width: 12rpx;
-  height: 12rpx;
-  margin-top: 12rpx;
+  width: 6px;
+  height: 6px;
+  margin-top: 6px;
   background: var(--wot-primary-6, #299764);
   border-radius: 50%;
-  box-shadow: 0 0 0 6rpx rgba(41, 151, 100, 0.12);
+  box-shadow: 0 0 0 3px rgba(41, 151, 100, 0.12);
 }
 
 .demo-status__content {
@@ -160,58 +160,58 @@ button.demo-chip.is-active .demo-chip__dot {
 .demo-status__title {
   display: block;
   color: var(--wot-text-main, #111827);
-  font-size: 26rpx;
+  font-size: 13px;
   font-weight: 600;
-  line-height: 38rpx;
+  line-height: 19px;
   word-break: break-all;
 }
 
 .demo-status__detail {
   display: block;
-  margin-top: 2rpx;
+  margin-top: 1px;
   color: var(--wot-text-auxiliary, #667085);
-  font-size: 22rpx;
-  line-height: 34rpx;
+  font-size: 11px;
+  line-height: 17px;
   word-break: break-all;
 }
 
 .demo-status__actions {
   display: flex;
-  gap: 12rpx;
-  margin-top: 12rpx;
+  gap: 6px;
+  margin-top: 6px;
 }
 
 // 结果回显标签（弹窗选择等场景）
 .demo-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 12rpx;
-  margin-top: 20rpx;
+  gap: 6px;
+  margin-top: 10px;
 }
 
 .demo-tag {
-  max-width: 240rpx;
-  padding: 6rpx 16rpx;
+  max-width: 120px;
+  padding: 3px 8px;
   overflow: hidden;
   color: #247d53;
-  font-size: 22rpx;
-  line-height: 34rpx;
+  font-size: 11px;
+  line-height: 17px;
   text-overflow: ellipsis;
   white-space: nowrap;
   background: #edf8f2;
-  border-radius: 10rpx;
+  border-radius: 5px;
 }
 
 // wd-cell-group 外层圆角（能力目录等）
 .demo-cells {
   overflow: hidden;
-  border-radius: 24rpx;
+  border-radius: 12px;
 }
 
 // 虚拟渲染等需要边框限高的树容器
 .demo-tree-frame {
-  margin-top: 20rpx;
+  margin-top: 10px;
   overflow: hidden;
-  border: 1rpx solid var(--wot-border-light, #e4e7ec);
-  border-radius: 16rpx;
+  border: 1px solid var(--wot-border-light, #e4e7ec);
+  border-radius: 8px;
 }

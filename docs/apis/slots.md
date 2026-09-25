@@ -29,7 +29,7 @@
   </template>
   <template #append="{ data }">
     <!-- data 是你传入的原始数据项，可读任意业务字段 -->
-    <text v-if="data.append" style="color:#87918b; font-size:17rpx;">
+    <text v-if="data.append" style="color:#87918b; font-size:11px;">
       {{ data.append }}
     </text>
   </template>

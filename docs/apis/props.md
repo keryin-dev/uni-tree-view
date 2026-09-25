@@ -75,7 +75,7 @@ interface TreeProps {
 | --- | --- | --- | --- |
 | `theme-color` | `string` | `#007aff` | 主题色（选中控件、高亮） |
 | `node-class` | `string` | `""` | 添加到每个节点行的自定义 class，不必依赖组件内部类名 |
-| `indent` | `number` | `40` | 每级缩进，单位 **rpx** |
+| `indent` | `number` | `20` | 每级缩进，单位 **px**，不随屏幕宽度缩放 |
 | `selection-placement` | `"left" \| "right"` | `"left"` | 单选按钮或复选框的位置 |
 | `empty-text` | `string` | `暂无数据` | 空数据文案 |
 | `show-path` | `boolean` | `false` | 非根节点的 label 下方展示完整路径；根节点不重复显示路径行 |

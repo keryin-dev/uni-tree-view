@@ -31,7 +31,7 @@
         :id="item.domId"
         :key="item.node.id"
         :style="{
-          paddingLeft: `${item.node.level * props.indent}rpx`,
+          paddingLeft: `${item.node.level * props.indent}px`,
           height: virtualEnabled ? `${props.virtualItemHeight}px` : undefined,
           minHeight: virtualEnabled ? `${props.virtualItemHeight}px` : undefined
         }"
@@ -199,7 +199,7 @@ const props = withDefaults(defineProps<UniTreeViewProps>(), {
   checkedDisabled: false,
   packDisabledKey: undefined,
   nodeClass: "",
-  indent: 40,
+  indent: 20,
   selectionPlacement: "left",
   emptyText: "暂无数据",
   showPath: false,

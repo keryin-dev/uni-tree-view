@@ -39,7 +39,7 @@ pageClass: examples-page
     theme-color="#299764"
   >
     <template #icon="{ node }">
-      <wd-icon :name="node.isLeaf ? 'user' : 'folder'" size="32rpx" color="#299764" />
+      <wd-icon :name="node.isLeaf ? 'user' : 'folder'" size="16px" color="#299764" />
     </template>
 
     <template #label="{ node, data }">
@@ -67,7 +67,7 @@ const checkedValue = ref([]);
 <style lang="scss">
 .demo-node-label {
   display: flex;
-  gap: 8rpx;
+  gap: 4px;
   align-items: center;
   min-width: 0;
 }
@@ -78,19 +78,19 @@ const checkedValue = ref([]);
 
 /* NEW 徽标：小面积高饱和，只在成员名字后面点一下 */
 .demo-badge {
-  padding: 1rpx 7rpx;
+  padding: 1px 4px;
   color: #b63f3f;
-  font-size: 14rpx;
+  font-size: 10px;
   font-weight: 750;
-  line-height: 22rpx;
+  line-height: 14px;
   background: #fff0f0;
-  border-radius: 7rpx;
+  border-radius: 4px;
 }
 
 /* 人数文案做弱化处理，不加标签底色，避免抢节点主文案 */
 .demo-append {
   color: #87918b;
-  font-size: 17rpx;
+  font-size: 11px;
   white-space: nowrap;
 }
 </style>
@@ -106,7 +106,7 @@ const checkedValue = ref([]);
 <uni-tree-view :data="treeData" selectable multiple>
   <template #label="{ node, data }">
     <text :style="{ fontWeight: node.level === 0 ? 600 : 400 }">{{ node.label }}</text>
-    <text v-if="data.isNew" style="color: #fa4350; font-size: 20rpx;">NEW</text>
+    <text v-if="data.isNew" style="color: #fa4350; font-size: 10px;">NEW</text>
   </template>
 </uni-tree-view>
 ```
@@ -139,7 +139,7 @@ const checkedValue = ref([]);
 .custom-node {
   display: flex;
   flex: 1;
-  gap: 12rpx;
+  gap: 6px;
   align-items: center;
   min-width: 0;
 }
@@ -152,13 +152,13 @@ const checkedValue = ref([]);
 .custom-node__desc {
   display: block;
   color: #87918b;
-  font-size: 17rpx;
+  font-size: 11px;
 }
 
 .custom-node__count {
   flex: 0 0 auto;
   color: #87918b;
-  font-size: 17rpx;
+  font-size: 11px;
 }
 </style>
 ```
