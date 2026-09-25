@@ -17,8 +17,9 @@
     color: #a3aab8;
   }
 
-  // 状态层始终保留在节点树中，选中时只改 opacity。
-  // 避免小程序在选中/反选时反复创建伪元素并重新合成整行。
+  // 状态层始终保留在节点树中，避免小程序在选中/反选时反复创建伪元素并重新合成整行。
+  // 透明度固定为静态值，选中时只过渡背景色：opacity 动画会让 Chromium 内核把后续所有行
+  // 临时提升为合成层，行坐标含小数时下方节点会在动画起止各跳一次亚像素（开发者工具可见）。
   &__state-layer {
     position: absolute;
     top: 0;
@@ -26,14 +27,14 @@
     bottom: 0;
     left: 0;
     z-index: 0;
-    background-color: var(--theme-color, #007aff);
-    opacity: 0;
+    background-color: transparent;
+    opacity: 0.06;
     pointer-events: none;
-    transition: opacity 0.2s ease;
+    transition: background-color 0.2s ease;
   }
 
   &.is-checked &__state-layer {
-    opacity: 0.06;
+    background-color: var(--theme-color, #007aff);
   }
 
   &.is-checked .utv-tree-node-label {
@@ -41,7 +42,7 @@
   }
 
   &.is-disabled &__state-layer {
-    opacity: 0;
+    background-color: transparent;
   }
 
   &.is-disabled.is-checked .utv-tree-node-label {
