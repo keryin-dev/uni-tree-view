@@ -61,7 +61,7 @@ artifacts       本地产物（HBuilderX 发布用工程、npm 包 tgz）
 pnpm check:all
 ```
 
-它依次运行 `check`、`check:platforms`、`check:size`、`docs:build`，不会提升版本、创建 tag 或发布。无需在它之前或之后再重复执行这四项。
+它依次运行 `check`、`check:platforms`、`check:size`、`docs:build`，不会提升版本、创建 tag 或发布。无需在它之前或之后再重复执行这四项。执行时会显示 `[当前步/总步数]` 和每步耗时；任一步失败即停止，并提示单独重跑的命令。
 
 `pnpm check` 包含 lint、类型、带覆盖率下限的测试、组件构建及 npm/DCloud 分发内容检查。`pnpm check:size` 使用最小工程的三端生产构建，不拿整个演示站的大小代替组件大小；`check:platforms` 则构建实际 playground，检查目标不同，不能互相替代。
 

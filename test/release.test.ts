@@ -11,12 +11,8 @@ describe("release validation", () => {
     const { scripts } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")) as {
       scripts: Record<string, string>;
     };
-    expect(scripts["check:all"].split(" && ")).toEqual([
-      "pnpm check",
-      "pnpm check:platforms",
-      "pnpm check:size",
-      "pnpm docs:build"
-    ]);
+    // 完整校验的步骤清单由 run-checks.test.ts 断言。
+    expect(scripts["check:all"]).toBe("tsx scripts/run-checks.ts --all");
     expect(scripts["release:prepare"])
       .toBe("pnpm changelog:generate && pnpm changelog:promote && pnpm check:all");
   });
