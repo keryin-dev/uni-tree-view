@@ -74,6 +74,8 @@ const PackageImportPattern = new RegExp(
   String.raw`^[^\S\n]*import\b([^;"']+?)\bfrom\s*["']${NpmPackageName}["'];?[^\S\n]*\n?`,
   "gm"
 );
+// 根 pnpm-workspace.yaml 的 allowBuilds 块：键所在行之后连续的缩进行。
+const AllowBuildsBlockPattern = /^allowBuilds:[^\S\n]*\n((?:[^\S\n]+\S.*\n)+)/m;
 
 function r(...paths: string[]) {
   return resolve(cwd(), ".", ...paths);
@@ -499,6 +501,20 @@ async function makeExampleStandalone(exampleDir: string) {
   }
 }
 
+// 示例工程要拿到仓库外单独安装（CI 与插件市场用户都是如此），读不到根 pnpm-workspace.yaml。
+// pnpm 11 把未审批的依赖构建脚本视为错误并中断安装，所以把根配置的 allowBuilds 原样带过去，
+// 不另维护一份清单。
+async function writeExampleWorkspaceConfig(exampleDir: string) {
+  // 末尾补一个换行：块位于文件最后且没有结尾换行时，最后一项也能匹配到。
+  const source = `${(await readFile(r("pnpm-workspace.yaml"), "utf8")).replace(/\r\n/g, "\n")}\n`;
+  const allowBuilds = AllowBuildsBlockPattern.exec(source)?.[1];
+  if (!allowBuilds) {
+    throw new Error("The root pnpm-workspace.yaml must declare allowBuilds as an indented block");
+  }
+
+  await outputFile(r(exampleDir, "pnpm-workspace.yaml"), `allowBuilds:\n${allowBuilds.trimEnd()}\n`);
+}
+
 async function buildExampleProject(pkg: PackageJson, exampleDir: string) {
   const playgroundDir = r("playground");
   await emptyDir(exampleDir);
@@ -522,6 +538,7 @@ async function buildExampleProject(pkg: PackageJson, exampleDir: string) {
   );
   delete examplePackage.main;
   await outputFile(examplePackagePath, `${JSON.stringify(examplePackage, null, 2)}\n`);
+  await writeExampleWorkspaceConfig(exampleDir);
 
   await makeExampleStandalone(exampleDir);
   await outputFile(r(exampleDir, "README.md"), `# ${PluginDisplayName} 示例工程
