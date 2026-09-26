@@ -1,6 +1,6 @@
 {
   "name": "uni-tree-view",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "packageManager": "pnpm@11.27.1",
   "description": "适用于 uni-app 与 Vue 3 的跨平台树形组件，支持单选、多选、筛选、懒加载和虚拟列表",
