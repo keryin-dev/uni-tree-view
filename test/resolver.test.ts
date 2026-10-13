@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { UniTreeViewResolver } from "../packages/core/resolver";
 
+function getResolverFunction(resolver: ReturnType<typeof UniTreeViewResolver>) {
+  return typeof resolver === "function" ? resolver : resolver.resolve;
+}
+
 describe("uni-tree-view resolver", () => {
   it("resolves the recommended component name", () => {
     const resolver = UniTreeViewResolver();
 
-    expect(resolver.resolve("UniTreeView")).toEqual({
+    expect(getResolverFunction(resolver)("UniTreeView")).toEqual({
       name: "UniTreeView",
       from: "uni-tree-view"
     });
@@ -16,6 +20,6 @@ describe("uni-tree-view resolver", () => {
       exclude: /^UniTree/
     });
 
-    expect(resolver.resolve("UniTreeView")).toBeUndefined();
+    expect(getResolverFunction(resolver)("UniTreeView")).toBeUndefined();
   });
 });

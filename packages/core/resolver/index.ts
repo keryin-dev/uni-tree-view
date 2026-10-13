@@ -1,32 +1,30 @@
-import type { ComponentResolverObject } from "@uni-helper/vite-plugin-uni-components";
+import type { ComponentResolver } from "@uni-helper/vite-plugin-uni-components";
+import type { FilterPattern } from "vite";
+import { createFilter } from "vite";
 
 const INDEX = "uni-tree-view";
 
-const importsMap: Record<string, string> = {
-  "UniTreeView": INDEX
-};
+const importsMap = new Map<string, string>([
+  ["UniTreeView", INDEX]
+]);
 
 export interface UniTreeViewResolverOptions {
-  exclude?: RegExp;
+  exclude?: FilterPattern;
 }
 
-export function UniTreeViewResolver(options: UniTreeViewResolverOptions = {}): ComponentResolverObject {
+export function UniTreeViewResolver(options: UniTreeViewResolverOptions = {}): ComponentResolver {
+  const filter = createFilter(undefined, options.exclude, { resolve: false });
+
   return {
     type: "component",
-    resolve(name: string) {
-      if (options.exclude && name.match(options.exclude)) {
-        return;
-      }
-
-      const from = importsMap[name];
-
-      if (from == null) {
+    resolve(name) {
+      if (!filter(name) || !importsMap.has(name)) {
         return;
       }
 
       return {
         name,
-        from
+        from: importsMap.get(name)!
       };
     }
   };

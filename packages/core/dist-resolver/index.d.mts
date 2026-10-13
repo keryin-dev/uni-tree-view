@@ -1,9 +1,10 @@
-import { ComponentResolverObject } from '@uni-helper/vite-plugin-uni-components';
+import { ComponentResolver } from '@uni-helper/vite-plugin-uni-components';
+import { FilterPattern } from 'vite';
 
 interface UniTreeViewResolverOptions {
-    exclude?: RegExp;
+    exclude?: FilterPattern;
 }
-declare function UniTreeViewResolver(options?: UniTreeViewResolverOptions): ComponentResolverObject;
+declare function UniTreeViewResolver(options?: UniTreeViewResolverOptions): ComponentResolver;
 
 export { UniTreeViewResolver };
 export type { UniTreeViewResolverOptions };
