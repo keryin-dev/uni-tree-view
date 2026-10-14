@@ -1,7 +1,7 @@
 {
   "name": "@uni-tree-view/playground",
   "type": "module",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "packageManager": "pnpm@11.27.1",
   "description": "uni-tree-view 跨平台示例与开发调试工程",
   "author": "keryin-dev <415561402@qq.com>",

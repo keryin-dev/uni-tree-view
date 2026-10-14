@@ -4,6 +4,13 @@
 
 ## Unreleased
 
+## 1.1.1 - 2026-10-14
+
+### Fixed
+
+- **resolver:** 修复 `importsMap[name]` 错误识别 constructor 等原型链属性 (#1)。
+- **dcloud:** 示例工程补充 allowBuilds，修复 pnpm 11 下安装失败。
+
 ## 1.1.0 - 2026-09-26
 
 ### Changed
