@@ -2,7 +2,7 @@
 
 > Tree view and selection component for uni-app and Vue 3. It supports single and multiple selection, parent-child association, strict selection, disabled nodes, filtering and highlighting, lazy loading with retry, fixed-height virtual rendering, and custom slots.
 
-Uni Tree View is distributed through npm and the DCloud plugin marketplace. The verified targets and known limitations are documented on the platform compatibility page. The project is currently in the 0.x stage, so check the changelog before upgrading.
+Uni Tree View is distributed through npm and the DCloud plugin marketplace. The verified targets and known limitations are documented on the platform compatibility page. Since 1.0.0 the public API follows semantic versioning; see the versioning page and the changelog before upgrading.
 
 ## Start Here
 
@@ -10,6 +10,7 @@ Uni Tree View is distributed through npm and the DCloud plugin marketplace. The 
 - [Installation](https://uni-tree-view.keryin.top/guide/installation): npm and DCloud installation, manual import, resolver-based automatic import, and global types.
 - [Quick Start](https://uni-tree-view.keryin.top/guide/quick-start): Copyable examples for basic data, selection with v-model, field mapping, node styling, and filtering.
 - [Platform Compatibility](https://uni-tree-view.keryin.top/guide/platforms): Verified platforms, unverified targets, and cross-platform implementation notes.
+- [Versioning and Bundle Size](https://uni-tree-view.keryin.top/guide/versioning): Semantic versioning boundary, public entry points, and how the final component size is measured.
 - [License and Attribution](https://uni-tree-view.keryin.top/guide/license): MIT notice requirements, recommended attribution, and guidance for modified distributions.
 - [FAQ](https://uni-tree-view.keryin.top/guide/faq): Controlled values, disabled nodes, virtual scrolling, component styling, lazy-load retry, and common integration issues.
 

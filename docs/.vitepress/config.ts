@@ -46,6 +46,28 @@ const siteBase = process.env.DOCS_BASE ?? "/";
 const demoLink = process.env.VITE_DEMO_URL ?? "/ui/index.html";
 const siteUrl = process.env.DOCS_SITE_URL ?? "https://uni-tree-view.keryin.top";
 
+/* 本地搜索的中文分词：MiniSearch 默认只按空白和标点切词，整句中文会变成一个长词，
+   「半选」「滚动错位」这类出现在句中的词搜不到。这里把连续的中日韩字符切成二元组
+   （单字时保留单字），建索引和查询共用同一规则，并以 AND 组合多个片段。
+   VitePress 会把函数序列化后发往浏览器，因此函数体必须自包含，不能引用外部变量。 */
+function tokenizeSearchText(text: string): string[] {
+  const tokens: string[] = [];
+  for (const piece of text.split(/[\s\p{P}\p{S}]+/u)) {
+    for (const run of piece.match(/[\u3040-\u30FF\u3400-\u9FFF\uF900-\uFAFF]+|[^\u3040-\u30FF\u3400-\u9FFF\uF900-\uFAFF]+/gu) ?? []) {
+      if (!/[\u3040-\u30FF\u3400-\u9FFF\uF900-\uFAFF]/u.test(run)) {
+        tokens.push(run);
+      } else if (run.length === 1) {
+        tokens.push(run);
+      } else {
+        for (let index = 0; index < run.length - 1; index += 1) {
+          tokens.push(run.slice(index, index + 2));
+        }
+      }
+    }
+  }
+  return tokens;
+}
+
 export default defineConfig({
   lang: "zh-CN",
   title: "Uni Tree View",
@@ -117,7 +139,15 @@ export default defineConfig({
     outline: { label: "本页目录", level: [2, 3] },
     docFooter: { prev: "上一页", next: "下一页" },
     lastUpdatedText: "最后更新",
-    search: { provider: "local" },
+    search: {
+      provider: "local",
+      options: {
+        miniSearch: {
+          options: { tokenize: tokenizeSearchText },
+          searchOptions: { tokenize: tokenizeSearchText, combineWith: "AND" }
+        }
+      }
+    },
     footer: {
       message: "Released under the MIT License · 使用或改造请保留版权与许可声明",
       copyright: "Copyright © 2025-present keryin-dev"

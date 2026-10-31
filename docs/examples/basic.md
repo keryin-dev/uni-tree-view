@@ -66,7 +66,7 @@ const treeData = ref([
 <uni-tree-view :data="treeData" :default-expanded-keys="['frontend']" />
 ```
 
-`default-expanded-keys` 用于设置默认展开节点。指定后代节点时，组件默认也会展开它的所有祖先；如不需要，可设置 `default-expand-parent="false"`。
+`default-expanded-keys` 用于设置默认展开节点。指定后代节点时，组件默认也会展开它的所有祖先；如不需要，可设置 `:default-expand-parent="false"`。
 
 之后如果修改 `default-expanded-keys`，组件会按新值重新设置整棵树的展开状态，覆盖用户手动展开或收起的结果。需要在运行时只改变部分节点时，请使用 [`setExpandedKeys`](/apis/methods#展开)。
 
@@ -78,7 +78,7 @@ const treeData = ref([
 { id: "backend-2", label: "顾宁", disabled: true }
 ```
 
-如果禁用的是父节点，父节点仍可在非严格多选中汇总子节点状态：子节点可正常选择，部分选中时父节点半选，全部选中时父节点全选，但父节点自身不可直接操作。`pack-disabled-key="false"` 只会把这个已选禁用父节点从返回结果中排除，不改变其视觉状态。
+如果禁用的是父节点，父节点仍可在非严格多选中汇总子节点状态：子节点可正常选择，部分选中时父节点半选，全部选中时父节点全选，但父节点自身不可直接操作。`:pack-disabled-key="false"` 只会把这个已选禁用父节点从返回结果中排除，不改变其视觉状态。
 
 如果业务需要直接改变禁用节点的选中状态，可显式开启 `checked-disabled`。字段名不叫 `disabled` 时用 `tree-props` 映射：
 
