@@ -45,7 +45,8 @@ export function useTreeViewState(props: TreeViewStateProps) {
   const pendingCheckChangePayload = shallowRef<TreeCheckChangePayload | null>(null);
   const childrenMap = ref<Map<TreeKey, TreeNode[]>>(new Map());
   const nodeMap = ref<Map<TreeKey, TreeNode>>(new Map());
-  const cachedExpandedKeys = ref<Set<TreeKey>>(new Set());
+  // 只在重建时读写，不参与渲染，无需响应式。
+  const cachedExpandedKeys = new Set<TreeKey>();
   // 目标节点尚未加载出来的选中 key 暂存于此，等懒加载补齐节点后再落地为真实选中态。
   let pendingCheckedKeys = new Set<TreeKey>();
   // 上述待选 key 中来自 setCheckedKeys 等命令式调用的子集：落地后需要额外抛出选中事件，
@@ -159,9 +160,9 @@ export function useTreeViewState(props: TreeViewStateProps) {
     node.expanded = nextExpanded;
     if (props.cacheExpandedKeys) {
       if (node.expanded) {
-        cachedExpandedKeys.value.add(node.id);
+        cachedExpandedKeys.add(node.id);
       } else {
-        cachedExpandedKeys.value.delete(node.id);
+        cachedExpandedKeys.delete(node.id);
       }
     }
     updateVisibility();
@@ -203,9 +204,9 @@ export function useTreeViewState(props: TreeViewStateProps) {
     list: TreeDataItem[] = [],
     level = 0,
     parentIds: TreeKey[] = [],
-    parents: TreeDataItem[] = []
+    parents: TreeDataItem[] = [],
+    nodes: TreeNode[] = []
   ) {
-    const nodes: TreeNode[] = [];
     const {
       id: idKey,
       label: labelKey,
@@ -214,7 +215,14 @@ export function useTreeViewState(props: TreeViewStateProps) {
       append: appendKey = "append",
       icon: iconKey = "icon"
     } = resolvedTreeProps.value;
-    list.forEach((item) => {
+    // 新节点在此处首次登记，写入原始 Map 以跳过响应式集合的拦截开销（万级节点时占重建耗时的大头）。
+    // 读取仍经过响应式 Map 并拿到节点代理；每次结构变化后 treeList / visibleTreeList 都会整体
+    // 重新赋值，视图依赖由它们触发，不依赖这两个索引自身的变更通知。
+    const rawNodeMap = toRaw(nodeMap.value);
+    const rawChildrenMap = toRaw(childrenMap.value);
+    // 所有层级共用同一个结果数组按前序追加：避免逐层复制子数组，
+    // 也避免 push(...children) 在单层子节点过多时超出调用栈参数上限。
+    for (const item of list) {
       const id = item[idKey] as TreeKey;
       const children = item[childrenKey];
       const label = String(item[labelKey] ?? "");
@@ -246,24 +254,26 @@ export function useTreeViewState(props: TreeViewStateProps) {
       treeNode.loaded = treeNode.isLeaf || !props.loadMode || (Array.isArray(children) && children.length > 0 && !props.alwaysFirstLoad);
       nodes.push(treeNode);
 
-      if (id !== undefined && id !== null && nodeMap.value.has(id)) {
+      if (id !== undefined && id !== null && rawNodeMap.has(id)) {
         warnOnce(
           `duplicate:${String(id)}`,
           `[uni-tree-view] 检测到重复节点 key：${String(id)}。请确保 tree-props.id 映射的值在整棵树中唯一。`
         );
       }
-      nodeMap.value.set(id, treeNode);
+      rawNodeMap.set(id, treeNode);
       if (parentId !== undefined) {
-        if (!childrenMap.value.has(parentId)) {
-          childrenMap.value.set(parentId, []);
+        const siblings = rawChildrenMap.get(parentId);
+        if (siblings) {
+          toRaw(siblings).push(treeNode);
+        } else {
+          rawChildrenMap.set(parentId, [treeNode]);
         }
-        childrenMap.value.get(parentId)!.push(treeNode);
       }
 
       if (Array.isArray(children) && children.length > 0) {
-        nodes.push(...flattenTree(children, level + 1, [...parentIds, id], [...parents, item]));
+        flattenTree(children, level + 1, [...parentIds, id], [...parents, item], nodes);
       }
-    });
+    }
 
     return nodes;
   }
@@ -363,10 +373,19 @@ export function useTreeViewState(props: TreeViewStateProps) {
       }
     }
 
-    for (const node of treeList.value) {
-      node.expanded = Boolean(props.defaultExpandAll)
-        || expandedKeySet.has(node.id)
-        || (Boolean(props.cacheExpandedKeys) && cachedExpandedKeys.value.has(node.id));
+    const expandAll = Boolean(props.defaultExpandAll);
+    const useCachedKeys = Boolean(props.cacheExpandedKeys);
+    const nodes = treeList.value;
+    const rawNodes = toRaw(nodes);
+    for (let index = 0; index < rawNodes.length; index += 1) {
+      // 读原始对象、仅在值变化时经代理写入，避免对整棵树逐节点触发响应式 set。
+      const rawNode = toRaw(rawNodes[index]);
+      const expanded = expandAll
+        || expandedKeySet.has(rawNode.id)
+        || (useCachedKeys && cachedExpandedKeys.has(rawNode.id));
+      if (rawNode.expanded !== expanded) {
+        nodes[index].expanded = expanded;
+      }
     }
 
     applyExpandCheckedState();
@@ -487,33 +506,39 @@ export function useTreeViewState(props: TreeViewStateProps) {
     if (rawFilterValue) {
       const visibleKeySet = new Set<TreeKey>();
       const matchedNodes: TreeNode[] = [];
-      for (const node of treeList.value) {
+      const nodes = treeList.value;
+      const rawNodes = toRaw(nodes);
+      for (let index = 0; index < rawNodes.length; index += 1) {
+        // 只读字段走原始对象，避免逐节点代理与依赖收集；自定义匹配函数和结果仍使用代理节点。
+        const node = nodes[index];
+        const rawNode = toRaw(rawNodes[index]);
         const matched = props.filterMethod
           ? props.filterMethod(rawFilterValue, node)
-          : node.label.toLowerCase().includes(normalizedFilterValue);
+          : rawNode.label.toLowerCase().includes(normalizedFilterValue);
         if (!matched) {
           continue;
         }
 
         matchedNodes.push(node);
         // 前序遍历中，已可见的当前节点只能被先前命中的祖先整支覆盖；仍须登记自身匹配。
-        if (visibleKeySet.has(node.id)) {
+        if (visibleKeySet.has(rawNode.id)) {
           continue;
         }
-        visibleKeySet.add(node.id);
-        for (const parentId of node.parentIds) {
+        visibleKeySet.add(rawNode.id);
+        for (const parentId of rawNode.parentIds) {
           visibleKeySet.add(parentId);
         }
-        addDescendantVisibleKeys(node.id, visibleKeySet);
+        addDescendantVisibleKeys(rawNode.id, visibleKeySet);
       }
 
-      for (const node of treeList.value) {
-        const visible = visibleKeySet.has(node.id);
-        if (node.visible !== visible) {
-          node.visible = visible;
+      for (let index = 0; index < rawNodes.length; index += 1) {
+        const rawNode = toRaw(rawNodes[index]);
+        const visible = visibleKeySet.has(rawNode.id);
+        if (rawNode.visible !== visible) {
+          nodes[index].visible = visible;
         }
         if (visible) {
-          visibleNodes.push(node);
+          visibleNodes.push(nodes[index]);
         }
       }
       visibleTreeList.value = visibleNodes;
@@ -567,9 +592,9 @@ export function useTreeViewState(props: TreeViewStateProps) {
 
     for (const node of treeList.value) {
       if (node.expanded) {
-        cachedExpandedKeys.value.add(node.id);
+        cachedExpandedKeys.add(node.id);
       } else {
-        cachedExpandedKeys.value.delete(node.id);
+        cachedExpandedKeys.delete(node.id);
       }
     }
   }
@@ -591,18 +616,27 @@ export function useTreeViewState(props: TreeViewStateProps) {
   }
 
   function clearCheckedStatus() {
-    for (const node of treeList.value) {
-      if (!canSelectDisabledNode(node)) {
+    const checkedDisabled = Boolean(props.checkedDisabled);
+    const nodes = treeList.value;
+    const rawNodes = toRaw(nodes);
+    for (let index = 0; index < rawNodes.length; index += 1) {
+      const rawNode = toRaw(rawNodes[index]);
+      if ((rawNode.disabled && !checkedDisabled) || rawNode.checked === CHECK_STATUS_MAP.unchecked) {
         continue;
       }
-      node.checked = CHECK_STATUS_MAP.unchecked;
+      nodes[index].checked = CHECK_STATUS_MAP.unchecked;
     }
   }
 
   function getRawCheckedKeys() {
-    return treeList.value
-      .filter((node) => node.checked === CHECK_STATUS_MAP.checked)
-      .map((node) => node.id);
+    const keys: TreeKey[] = [];
+    for (const rawNode of toRaw(treeList.value)) {
+      const node = toRaw(rawNode);
+      if (node.checked === CHECK_STATUS_MAP.checked) {
+        keys.push(node.id);
+      }
+    }
+    return keys;
   }
 
   function normalizeKeys(value: TreeKey | TreeKey[] | null | undefined): TreeKey[] {
@@ -783,16 +817,20 @@ export function useTreeViewState(props: TreeViewStateProps) {
     const halfCheckedNodes: TreeNode[] = [];
     const halfCheckedKeys: TreeKey[] = [];
     const includeDisabled = resolvedPackDisabledKey.value;
+    const candidates = treeList.value;
+    const rawCandidates = toRaw(candidates);
 
-    for (const candidate of treeList.value) {
+    // 载荷只在事件回调里构造，不处于侦听上下文，判定读原始对象即可；数组里仍放代理节点。
+    for (let index = 0; index < rawCandidates.length; index += 1) {
+      const candidate = toRaw(rawCandidates[index]);
       if (isPackableCheckedNode(candidate, includeDisabled)) {
-        nodes.push(candidate);
+        nodes.push(candidates[index]);
         keys.push(candidate.id);
         continue;
       }
 
       if (candidate.checked === CHECK_STATUS_MAP.indeterminate) {
-        halfCheckedNodes.push(candidate);
+        halfCheckedNodes.push(candidates[index]);
         halfCheckedKeys.push(candidate.id);
       }
     }
@@ -938,10 +976,15 @@ export function useTreeViewState(props: TreeViewStateProps) {
 
   function setExpandedKeys(keys: TreeKey[] | "all", expanded = true) {
     if (keys === "all") {
-      for (const node of treeList.value) {
-        if (!node.isLeaf) {
-          node.expanded = expanded;
-          syncExpandedCacheForNode(node);
+      const nodes = treeList.value;
+      const rawNodes = toRaw(nodes);
+      for (let index = 0; index < rawNodes.length; index += 1) {
+        const rawNode = toRaw(rawNodes[index]);
+        if (!rawNode.isLeaf) {
+          if (rawNode.expanded !== expanded) {
+            nodes[index].expanded = expanded;
+          }
+          syncExpandedCacheForNode(rawNode);
         }
       }
       updateVisibility();
@@ -964,9 +1007,9 @@ export function useTreeViewState(props: TreeViewStateProps) {
     }
 
     if (node.expanded) {
-      cachedExpandedKeys.value.add(node.id);
+      cachedExpandedKeys.add(node.id);
     } else {
-      cachedExpandedKeys.value.delete(node.id);
+      cachedExpandedKeys.delete(node.id);
     }
   }
 
@@ -1004,7 +1047,10 @@ export function useTreeViewState(props: TreeViewStateProps) {
         continue;
       }
       visibleKeySet.add(child.id);
-      pendingNodes.push(...(childrenMap.value.get(child.id) ?? []));
+      // 逐个入栈：单个父节点下子节点极多时，展开参数会超出调用栈上限。
+      for (const grandchild of childrenMap.value.get(child.id) ?? []) {
+        pendingNodes.push(grandchild);
+      }
     }
   }
 
@@ -1047,12 +1093,13 @@ export function useTreeViewState(props: TreeViewStateProps) {
 
     const childNodes = flattenTree(children, node.level + 1, [...node.parentIds, node.id], [...node.parents, node.source]);
     treeVersion.value += 1;
-    const nodeIndex = treeList.value.findIndex((item) => item.id === node.id);
-    if (nodeIndex === -1) {
-      treeList.value.push(...childNodes);
-    } else {
-      treeList.value.splice(nodeIndex + 1, 0, ...childNodes);
-    }
+    // 整体替换数组而非 splice(..., ...childNodes)：一次加载大量子节点时不会受函数参数个数限制，
+    // 也省去响应式数组逐个下标触发的开销。
+    const currentList = toRaw(treeList.value);
+    const nodeIndex = currentList.findIndex((item) => toRaw(item).id === node.id);
+    treeList.value = nodeIndex === -1
+      ? currentList.concat(childNodes)
+      : [...currentList.slice(0, nodeIndex + 1), ...childNodes, ...currentList.slice(nodeIndex + 1)];
 
     node.isLeaf = children.length === 0 && Boolean(props.loadMode);
     node.loaded = true;

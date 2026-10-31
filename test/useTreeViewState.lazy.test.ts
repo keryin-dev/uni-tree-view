@@ -42,6 +42,29 @@ describe("useTreeViewState: lazy loading", () => {
     expect(visibleKeys(state)).toEqual(["lazy-root", "lazy-child"]);
   });
 
+  it("inserts lazy children right after their parent and keeps later siblings in order", async () => {
+    const childCount = 150_000;
+    const { state } = createState({
+      data: [
+        { id: "first", label: "First", leaf: false },
+        { id: "second", label: "Second", leaf: false }
+      ],
+      loadMode: true,
+      loadApi: async (targetNode) => targetNode.id === "first"
+        ? Array.from({ length: childCount }, (_, index) => ({ id: `first-${index}`, label: `First ${index}`, leaf: true }))
+        : [{ id: "second-0", label: "Second 0", leaf: true }]
+    });
+
+    await state.loadNode(node(state, "second"));
+    await state.loadNode(node(state, "first"));
+
+    const ids = state.treeList.value.map((item) => item.id);
+    expect(ids).toHaveLength(childCount + 3);
+    expect(ids.slice(0, 2)).toEqual(["first", "first-0"]);
+    expect(ids.slice(-3)).toEqual([`first-${childCount - 1}`, "second", "second-0"]);
+    expect(node(state, "first-0").parentId).toBe("first");
+  });
+
   it("supports custom leaf resolver and alwaysFirstLoad", async () => {
     const { state } = createState({
       data: [

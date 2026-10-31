@@ -372,6 +372,26 @@ describe("useTreeViewState: structure, expansion and filtering", () => {
     expect(node(state, "city-0-0").checked).toBe(CHECK_STATUS_MAP.indeterminate);
   });
 
+  it("flattens and filters a parent whose children exceed the spread argument limit", async () => {
+    // 15 万个同级子节点超过 V8 展开参数上限，验证扁平化与过滤都不依赖 push(...items)。
+    const childCount = 150_000;
+    const { props, state } = createState({
+      data: [{
+        id: "root",
+        label: "Root",
+        children: Array.from({ length: childCount }, (_, index) => ({ id: `child-${index}`, label: `Child ${index}` }))
+      }]
+    });
+
+    expect(state.treeList.value).toHaveLength(childCount + 1);
+    expect(state.treeList.value[1].id).toBe("child-0");
+    expect(state.treeList.value[childCount].id).toBe(`child-${childCount - 1}`);
+
+    props.filterValue = "Root";
+    await nextTick();
+    expect(state.visibleTreeList.value).toHaveLength(childCount + 1);
+  });
+
   it("warns once for missing and duplicate node keys in development", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
 
