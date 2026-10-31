@@ -1,13 +1,12 @@
 import { shallowRef } from "vue";
-import { isEmpty } from "@/utils/helpers";
 
 export type Theme = "light" | "dark";
 
 const theme = shallowRef<Theme>("light");
 
 function toggle(value?: Theme) {
-  if (!isEmpty(value)) {
-    theme.value = value!;
+  if (value) {
+    theme.value = value;
     return;
   }
 

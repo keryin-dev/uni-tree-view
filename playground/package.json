@@ -60,7 +60,6 @@
     "@dcloudio/uni-mp-xhs": "catalog:prod",
     "@dcloudio/uni-quickapp-webview": "catalog:prod",
     "@wot-ui/ui": "catalog:prod",
-    "lodash-es": "catalog:utils",
     "uni-tree-view": "workspace:*",
     "vue": "catalog:frontend"
   },
@@ -70,7 +69,6 @@
     "@dcloudio/uni-stacktracey": "catalog:dev",
     "@dcloudio/vite-plugin-uni": "catalog:build",
     "@mini-types/alipay": "catalog:dev",
-    "@types/lodash-es": "catalog:types",
     "@types/node": "catalog:types",
     "@uni-helper/uni-app-types": "catalog:dev",
     "@vue/runtime-core": "catalog:dev",

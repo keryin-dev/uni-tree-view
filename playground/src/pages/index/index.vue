@@ -74,6 +74,7 @@
         <uni-tree-view
           ref="treeRef"
           v-model="checkedValue"
+          class="page__org-tree"
           selectable
           multiple
           check-on-click-node
@@ -436,6 +437,11 @@ function handleLazyVirtualLoadError(payload: TreeLoadErrorPayload) {
 
 .page__lazy-virtual-tree {
   height: 320px;
+}
+
+// 工具条与树之间留出间距，避免色板与首个节点贴在一起
+.page__org-tree {
+  margin-top: 8px;
 }
 
 :deep(.page__cells) {
