@@ -44,7 +44,7 @@ const treeData = ref([
 import { ref } from "vue";
 
 // key 是节点 id（或 tree-props.id 映射字段的值）
-// 多选时 v-model 是 key 数组；这里预选「前端组」，组内子节点会一起被选中
+// 多选时 v-model 是 key 数组；这里预选「前端组」（上例中是叶子节点）
 const checkedValue = ref(["frontend"]);
 
 // keys 是当前所有已选节点的 key
