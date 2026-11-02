@@ -1,4 +1,4 @@
-import { computed, ref, shallowRef, toRaw, watch } from "vue";
+import { computed, ref, shallowRef, toRaw, triggerRef, watch } from "vue";
 import { CHECK_STATUS_MAP, DefaultTreeProps } from "./constants";
 import type {
   CheckStatus,
@@ -137,6 +137,8 @@ export function useTreeViewState(props: TreeViewStateProps) {
     applyExpandedState();
     publishPendingSelectionChange(resolvedImperativeKeys);
     reconcileMissingControlledKeys(wasInitialized, checkedKeys);
+    triggerRef(nodeMap);
+    triggerRef(childrenMap);
   }
 
   function toggleExpand(node: TreeNode) {
@@ -216,8 +218,8 @@ export function useTreeViewState(props: TreeViewStateProps) {
       icon: iconKey = "icon"
     } = resolvedTreeProps.value;
     // 新节点在此处首次登记，写入原始 Map 以跳过响应式集合的拦截开销（万级节点时占重建耗时的大头）。
-    // 读取仍经过响应式 Map 并拿到节点代理；每次结构变化后 treeList / visibleTreeList 都会整体
-    // 重新赋值，视图依赖由它们触发，不依赖这两个索引自身的变更通知。
+    // 读取仍经过响应式 Map 并拿到节点代理；结构更新完成后统一 triggerRef 通知索引依赖，
+    // 让 getNode / getNodePath / hasChildren 等响应式查询也能感知新增和替换的节点。
     const rawNodeMap = toRaw(nodeMap.value);
     const rawChildrenMap = toRaw(childrenMap.value);
     // 所有层级共用同一个结果数组按前序追加：避免逐层复制子数组，
@@ -1109,6 +1111,8 @@ export function useTreeViewState(props: TreeViewStateProps) {
     applyPendingCheckedState();
     updateParentNodesStatus(node.id);
     updateVisibility();
+    triggerRef(nodeMap);
+    triggerRef(childrenMap);
   }
 
   async function loadNode(node: TreeNode) {

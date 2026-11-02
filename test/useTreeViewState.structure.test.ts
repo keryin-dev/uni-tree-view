@@ -47,6 +47,19 @@ describe("useTreeViewState: structure, expansion and filtering", () => {
     stop();
   });
 
+  it("notifies synchronous node queries after rebuilding the indexes", async () => {
+    const { props, state } = createState();
+    const labels: Array<string | undefined> = [];
+    const stop = watch(() => state.getNode("building-a")?.label, (label) => labels.push(label), { flush: "sync" });
+
+    props.data = [{ id: "building-a", label: "Replacement building" }];
+    await nextTick();
+
+    expect(labels.slice(-1)).toEqual(["Replacement building"]);
+    expect(state.getNode("building-a")?.label).toBe("Replacement building");
+    stop();
+  });
+
   it("supports custom treeProps mapping", () => {
     const { state } = createState({
       data: createMappedTreeData(),

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { nextTick } from "vue";
+import { computed, isReactive, nextTick, watch } from "vue";
 import { CHECK_STATUS_MAP } from "../packages/core/src/components/uni-tree-view/constants";
 import type { TreeDataItem } from "../packages/core/src/components/uni-tree-view/types";
 import {
@@ -40,6 +40,54 @@ describe("useTreeViewState: lazy loading", () => {
 
     state.toggleExpand(root);
     expect(visibleKeys(state)).toEqual(["lazy-root", "lazy-child"]);
+  });
+
+  it("updates reactive node, path and child queries after lazy loading", async () => {
+    const { state } = createState({
+      data: createLazyTreeData(),
+      loadMode: true,
+      loadApi: () => [{ id: "lazy-child", label: "Lazy child", leaf: true }]
+    });
+    const child = computed(() => state.getNode("lazy-child"));
+    const path = computed(() => state.getNodePath("lazy-child").map((item) => item.id));
+    const hasChildren = computed(() => state.hasChildren("lazy-root"));
+    const labels: Array<string | undefined> = [];
+    const stop = watch(() => state.getNode("lazy-child")?.label, (label) => labels.push(label), { flush: "sync" });
+
+    expect({ child: child.value, path: path.value, hasChildren: hasChildren.value }).toEqual({
+      child: undefined,
+      path: [],
+      hasChildren: false
+    });
+
+    await state.loadNode(node(state, "lazy-root"));
+
+    expect({ child: child.value, path: path.value, hasChildren: hasChildren.value }).toEqual({
+      child: state.getNode("lazy-child"),
+      path: ["lazy-root", "lazy-child"],
+      hasChildren: true
+    });
+    expect(child.value).toBe(state.getNode("lazy-child"));
+    expect(isReactive(child.value)).toBe(true);
+    expect(labels).toEqual(["Lazy child"]);
+    stop();
+  });
+
+  it("notifies synchronous node queries when a lazy response replaces an existing child", async () => {
+    const { state } = createState({
+      data: [{ id: "lazy-root", label: "Root", children: [{ id: "child", label: "Old child", leaf: true }] }],
+      loadMode: true,
+      alwaysFirstLoad: true,
+      loadApi: () => [{ id: "child", label: "Fresh child", leaf: true }]
+    });
+    const labels: Array<string | undefined> = [];
+    const stop = watch(() => state.getNode("child")?.label, (label) => labels.push(label), { flush: "sync" });
+
+    await state.loadNode(node(state, "lazy-root"));
+
+    expect(labels.slice(-1)).toEqual(["Fresh child"]);
+    expect(state.getNode("child")?.label).toBe("Fresh child");
+    stop();
   });
 
   it("inserts lazy children right after their parent and keeps later siblings in order", async () => {
