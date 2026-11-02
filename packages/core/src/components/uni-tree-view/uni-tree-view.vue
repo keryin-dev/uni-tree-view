@@ -148,6 +148,7 @@
 import { computed, getCurrentInstance, nextTick, onBeforeUnmount, shallowRef, watch } from "vue";
 import type {
   TreeCheckChangePayload,
+  TreeDataItem,
   TreeKey,
   TreeNode,
   TreeScrollToOptions,
@@ -215,6 +216,7 @@ const slots = defineSlots<UniTreeViewSlots>();
 const scrollIntoView = shallowRef("");
 const virtualScrollCommandTop = shallowRef<number>();
 const nodeDomIds = new Map<TreeKey, string>();
+const loadingNodes = new WeakMap<TreeNode, Promise<TreeDataItem[]>>();
 let nextNodeDomId = 0;
 
 const {
@@ -420,18 +422,24 @@ function handleNodeClick(node: TreeNode) {
   }
 }
 
-async function loadNode(node: TreeNode) {
-  const wasLoaded = node.loaded;
-  try {
-    const children = await loadStateNode(node);
-    if (!wasLoaded && node.loaded) {
+function loadNode(node: TreeNode): Promise<TreeDataItem[]> {
+  const pending = loadingNodes.get(node);
+  if (pending) {
+    return pending;
+  }
+  const shouldLoad = !node.loaded && !node.loading;
+  // 事件与实际请求绑定，所有调用方共享同一个结果，避免并发调用重复发送成功或失败事件。
+  const request = loadStateNode(node).then((children) => {
+    if (shouldLoad && node.loaded && getNode(node.id) === node) {
       emit("load", { node, children });
     }
     return children;
-  } catch (error) {
+  }, (error: unknown) => {
     emit("load-error", { node, error });
     throw error;
-  }
+  }).finally(() => loadingNodes.delete(node));
+  loadingNodes.set(node, request);
+  return request;
 }
 
 async function loadNodeSafely(node: TreeNode) {
@@ -442,10 +450,10 @@ async function loadNodeSafely(node: TreeNode) {
   }
 }
 
-async function retryLoad(keyOrNode: TreeKey | TreeNode) {
+function retryLoad(keyOrNode: TreeKey | TreeNode): Promise<TreeDataItem[]> {
   const node = typeof keyOrNode === "object" ? keyOrNode : getNode(keyOrNode);
   if (!node) {
-    return [];
+    return Promise.resolve([]);
   }
   return loadNode(node);
 }

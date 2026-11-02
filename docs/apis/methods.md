@@ -39,9 +39,13 @@ function selectAll() {
 
 懒加载模式下，尚未进入状态树的 key 会排队等待。方法先返回当前实际生效值；对应节点加载成功且可选后，组件再应用选中状态，并触发 `update:modelValue` 与 `check-change`。已经存在但受禁用规则拦截的节点不会进入等待队列。
 
+单选模式中，新的用户选择或取消选择会取消之前尚未落地的等待选择，后续加载不会覆盖用户的最新操作。
+
 `checked-disabled` 默认为 `false`，此时禁用节点的当前选中状态会被锁定：通过 `setCheckedKeys` 实现的全选、清空，以及父子联动和外部更新 `v-model`，都不会直接改变它。只有显式开启 `checked-disabled`，禁用节点才允许改变选中状态。
 
 `pack-disabled-key=false` 会把已选禁用节点从 `getCheckedKeys/getCheckedNodes`、`check-change` 和 `v-model` 中排除，但不会取消其内部/视觉选中状态。禁用父节点仍可能因子节点全部选中而显示为全选。
+
+非严格多选中的禁用父节点会继续汇总子节点状态。外部清空或替换 `v-model` 后，它的全选/半选状态也会重新计算；禁用叶节点仍遵循选中状态锁定规则。
 
 ## 展开
 
@@ -75,6 +79,8 @@ function selectAll() {
 | `loadNode` | `(node: TreeNode) => Promise<TreeDataItem[]>` | 手动触发节点加载 |
 | `retryLoad` | `(keyOrNode) => Promise<TreeDataItem[]>` | 重试加载失败的节点 |
 | `scrollToKey` | `(key, options?: { expandParents? }) => Promise<boolean>` | 滚动到指定节点（虚拟与普通模式均可用），`expandParents` 默认 `true`，先展开已加载的祖先链后定位 |
+
+同一节点加载期间，`loadNode` 和 `retryLoad` 的并发调用共享同一个在途 Promise，并取得相同的子节点数组或失败结果；一次实际请求只触发一次 `load` 或 `load-error`。失败后可再次调用重试。传入已从当前树移除的旧节点不会发起请求。
 
 `scrollToKey` 只能定位当前已经进入状态树的节点；目标 key 尚未通过懒加载创建时返回 `false`，且不会为了查找目标而自动加载后代。目标被筛选隐藏，或设置 `expandParents: false` 后仍不可见时，也返回 `false`。
 

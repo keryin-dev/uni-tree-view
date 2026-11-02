@@ -12,6 +12,7 @@ import type {
   UniTreeViewExposed
 } from "../packages/core/src/components/uni-tree-view/types";
 import UniTreeView from "../packages/core/src/components/uni-tree-view/uni-tree-view.vue";
+import { createDeferred } from "./helpers/treeViewState";
 
 const treeData = [
   {
@@ -396,6 +397,119 @@ describe("uni-tree-view component", () => {
       children: [{ id: "lazy-child", label: "Lazy child", leaf: true }]
     });
     expect(wrapper.text()).toContain("Lazy child");
+  });
+
+  it.each([false, true])("shares concurrent load calls and emits one success event (async: %s)", async (asynchronous) => {
+    const children = [{ id: "child", label: "Child", leaf: true }];
+    const request = createDeferred<typeof children>();
+    let calls = 0;
+    const wrapper = mount(UniTreeView, { props: {
+      data: [{ id: "root", label: "Root", leaf: false }],
+      loadMode: true,
+      loadApi: () => {
+        calls += 1;
+        return asynchronous ? request.promise : children;
+      }
+    } });
+    const tree = exposed(wrapper);
+    const root = tree.getNode("root")!;
+    const first = tree.loadNode(root);
+    const second = tree.retryLoad(root.id);
+    expect(second).toBe(first);
+    request.resolve(children);
+
+    expect(await Promise.all([first, second])).toEqual([children, children]);
+    expect(calls).toBe(1);
+    expect(wrapper.emitted("load")).toHaveLength(1);
+    expect(wrapper.emitted<TreeLoadPayload[]>("load")?.[0]?.[0].children).toEqual(children);
+    expect(await tree.loadNode(root)).toEqual([]);
+    expect(wrapper.emitted("load")).toHaveLength(1);
+    wrapper.unmount();
+  });
+
+  it.each([false, true])("shares concurrent failures, emits one error and permits a fresh retry (async: %s)", async (asynchronous) => {
+    const request = createDeferred<TreeLoadPayload["children"]>();
+    const error = new Error("request failed");
+    let calls = 0;
+    const wrapper = mount(UniTreeView, { props: {
+      data: [{ id: "root", label: "Root", leaf: false }],
+      loadMode: true,
+      loadApi: () => {
+        calls += 1;
+        if (calls > 1) {
+          return [];
+        }
+        if (!asynchronous) {
+          throw error;
+        }
+        return request.promise;
+      }
+    } });
+    const tree = exposed(wrapper);
+    const root = tree.getNode("root")!;
+    const first = tree.loadNode(root);
+    const second = tree.loadNode(root);
+    const outcomes = Promise.allSettled([first, second]);
+    if (asynchronous) {
+      request.reject(error);
+    }
+
+    expect(await outcomes).toEqual([
+      { status: "rejected", reason: error },
+      { status: "rejected", reason: error }
+    ]);
+    expect(wrapper.emitted("load-error")).toHaveLength(1);
+    expect(root.loading).toBe(false);
+    expect(await tree.retryLoad(root.id)).toEqual([]);
+    expect(calls).toBe(2);
+    expect(wrapper.emitted("load")).toHaveLength(1);
+    wrapper.unmount();
+  });
+
+  it.each([false, true])("keeps a new user single choice when an older pending key is loaded (clear: %s)", async (clear) => {
+    const wrapper = mount(UniTreeView, { props: {
+      data: [
+        { id: "root", label: "Root", leaf: false },
+        { id: "other", label: "Other", leaf: true }
+      ],
+      selectable: true,
+      checkOnClickNode: true,
+      loadMode: true,
+      loadApi: () => [{ id: "future", label: "Future", leaf: true }]
+    } });
+    const tree = exposed(wrapper);
+    tree.setCheckedKeys("future");
+    await wrapper.findAll(".utv-tree-item")[1].trigger("click");
+    if (clear) {
+      tree.setCheckedKeys("future");
+      await wrapper.findAll(".utv-tree-item")[1].trigger("click");
+    }
+    await tree.loadNode(tree.getNode("root")!);
+    await nextTick();
+
+    expect(tree.getCheckedKeys()).toEqual(clear ? [] : ["other"]);
+    expect(wrapper.emitted("update:modelValue")).toEqual(clear ? [["other"], [null]] : [["other"]]);
+    expect(wrapper.emitted("check-change")).toHaveLength(clear ? 2 : 1);
+    wrapper.unmount();
+  });
+
+  it("preserves the controlled value without a selection event when lazy children are replaced", async () => {
+    const wrapper = mount(UniTreeView, { props: {
+      data: [{ id: "root", label: "Root", children: [{ id: "child", label: "Old child", leaf: true }] }],
+      modelValue: "child",
+      loadMode: true,
+      alwaysFirstLoad: true,
+      loadApi: () => [{ id: "child", label: "Fresh child", leaf: true }]
+    } });
+    const tree = exposed(wrapper);
+    await tree.loadNode(tree.getNode("root")!);
+    await nextTick();
+
+    expect(tree.getCheckedKeys()).toEqual(["child"]);
+    expect(wrapper.props("modelValue")).toBe("child");
+    expect(wrapper.emitted("check-change")).toBeUndefined();
+    expect(wrapper.emitted("update:modelValue")).toBeUndefined();
+    wrapper.unmount();
   });
 
   it("emits load-error payloads and keeps failed lazy nodes retryable", async () => {

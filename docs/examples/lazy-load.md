@@ -154,6 +154,8 @@ function onError({ node }) {
 <uni-tree-view load-mode always-first-load :data="rootData" :load-api="loadChildren" />
 ```
 
+异步结果会替换原有子树。新旧节点使用相同 key 且仍满足选择规则时，会恢复受控值指定的选择；未绑定 `v-model` 时保留当前运行时选择，不会重新应用已经取消的默认选择。
+
 ## 与虚拟渲染组合
 
 懒加载可以和 `virtual` 同时使用：加载成功后新增节点会进入可见列表，虚拟窗口随之重新计算。组合示例、失败重试和共用加载函数见[虚拟渲染：与懒加载组合](/examples/virtual#与懒加载组合)。

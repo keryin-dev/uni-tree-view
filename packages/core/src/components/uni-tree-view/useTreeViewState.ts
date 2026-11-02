@@ -45,6 +45,8 @@ export function useTreeViewState(props: TreeViewStateProps) {
   const pendingCheckChangePayload = shallowRef<TreeCheckChangePayload | null>(null);
   const childrenMap = ref<Map<TreeKey, TreeNode[]>>(new Map());
   const nodeMap = ref<Map<TreeKey, TreeNode>>(new Map());
+  // 按节点对象隔离请求，同 key 的替换节点不会复用旧树的加载结果。
+  const loadingNodes = new WeakMap<TreeNode, Promise<TreeDataItem[]>>();
   // 只在重建时读写，不参与渲染，无需响应式。
   const cachedExpandedKeys = new Set<TreeKey>();
   // 目标节点尚未加载出来的选中 key 暂存于此，等懒加载补齐节点后再落地为真实选中态。
@@ -190,6 +192,9 @@ export function useTreeViewState(props: TreeViewStateProps) {
         updateParentNodesStatus(node.id);
       }
     } else {
+      // 后续用户操作取代先前尚未落地的单选请求，包括点击已选节点取消选择。
+      pendingCheckedKeys.clear();
+      pendingImperativeCheckedKeys.clear();
       const newStatus = node.checked === CHECK_STATUS_MAP.checked
         ? CHECK_STATUS_MAP.unchecked
         : CHECK_STATUS_MAP.checked;
@@ -281,8 +286,9 @@ export function useTreeViewState(props: TreeViewStateProps) {
   }
 
   function applyCheckedState(keys: TreeKey[]) {
-    clearCheckedStatus();
+    const clearedKeys = clearCheckedStatus();
     if (keys.length === 0) {
+      updateParentNodesStatus(clearedKeys);
       return;
     }
 
@@ -298,7 +304,8 @@ export function useTreeViewState(props: TreeViewStateProps) {
       }
 
       updateNodeAndDescendantsStatus(keys, CHECK_STATUS_MAP.checked, Boolean(props.checkedDisabled));
-      updateParentNodesStatus(keys);
+      // 旧分支中已清空的子节点也会影响父级汇总，不能只更新新 keys 的祖先。
+      updateParentNodesStatus([...clearedKeys, ...keys]);
       return;
     }
 
@@ -618,6 +625,7 @@ export function useTreeViewState(props: TreeViewStateProps) {
   }
 
   function clearCheckedStatus() {
+    const clearedKeys: TreeKey[] = [];
     const checkedDisabled = Boolean(props.checkedDisabled);
     const nodes = treeList.value;
     const rawNodes = toRaw(nodes);
@@ -627,7 +635,9 @@ export function useTreeViewState(props: TreeViewStateProps) {
         continue;
       }
       nodes[index].checked = CHECK_STATUS_MAP.unchecked;
+      clearedKeys.push(rawNode.id);
     }
+    return clearedKeys;
   }
 
   function getRawCheckedKeys() {
@@ -1091,6 +1101,10 @@ export function useTreeViewState(props: TreeViewStateProps) {
     const shouldInheritChecked = isMultiple.value
       && !props.checkStrictly
       && node.checked === CHECK_STATUS_MAP.checked;
+    // 只有替换已有子树时才需保留旧选择；未知节点的选择继续由 pending 队列处理。
+    const checkedKeys = hasChildren(node.id)
+      ? props.modelValue !== undefined ? getInitialCheckedKeys() : getRawCheckedKeys()
+      : null;
     removeDescendants(node.id);
 
     const childNodes = flattenTree(children, node.level + 1, [...node.parentIds, node.id], [...node.parents, node.source]);
@@ -1105,7 +1119,9 @@ export function useTreeViewState(props: TreeViewStateProps) {
 
     node.isLeaf = children.length === 0 && Boolean(props.loadMode);
     node.loaded = true;
-    if (shouldInheritChecked) {
+    if (checkedKeys) {
+      applyCheckedState(checkedKeys);
+    } else if (shouldInheritChecked) {
       updateNodeAndDescendantsStatus(childNodes.map((child) => child.id), CHECK_STATUS_MAP.checked);
     }
     applyPendingCheckedState();
@@ -1115,30 +1131,44 @@ export function useTreeViewState(props: TreeViewStateProps) {
     triggerRef(childrenMap);
   }
 
-  async function loadNode(node: TreeNode) {
-    if (!props.loadMode || !props.loadApi || node.isLeaf || node.loading || node.loaded) {
-      return [];
+  function loadNode(node: TreeNode): Promise<TreeDataItem[]> {
+    const pending = loadingNodes.get(node);
+    if (pending) {
+      return pending;
+    }
+    const loadApi = props.loadApi;
+    if (!props.loadMode || !loadApi || node.isLeaf || node.loading || node.loaded || nodeMap.value.get(node.id) !== node) {
+      return Promise.resolve([]);
     }
 
+    // 先登记 Promise，再调用外部 load-api，确保同步返回、同步抛错和重入调用都共享本次请求。
+    const request = Promise.resolve().then(async () => {
+      try {
+        if (nodeMap.value.get(node.id) !== node) {
+          return [];
+        }
+        const children = await loadApi(node);
+        const normalizedChildren = Array.isArray(children) ? children : [];
+        if (nodeMap.value.get(node.id) !== node) {
+          return normalizedChildren;
+        }
+        replaceNodeChildren(node, normalizedChildren);
+        return normalizedChildren;
+      } catch (error) {
+        if (nodeMap.value.get(node.id) !== node) {
+          return [];
+        }
+        node.loadError = error;
+        throw error;
+      } finally {
+        loadingNodes.delete(node);
+        node.loading = false;
+      }
+    });
+    loadingNodes.set(node, request);
     node.loading = true;
     node.loadError = null;
-    try {
-      const children = await props.loadApi(node);
-      const normalizedChildren = Array.isArray(children) ? children : [];
-      if (nodeMap.value.get(node.id) !== node) {
-        return normalizedChildren;
-      }
-      replaceNodeChildren(node, normalizedChildren);
-      return normalizedChildren;
-    } catch (error) {
-      if (nodeMap.value.get(node.id) !== node) {
-        return [];
-      }
-      node.loadError = error;
-      throw error;
-    } finally {
-      node.loading = false;
-    }
+    return request;
   }
 
   return {

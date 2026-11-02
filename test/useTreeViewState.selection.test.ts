@@ -118,6 +118,55 @@ describe("useTreeViewState: selection", () => {
     expect(state.getCheckedKeys()).toEqual(["child-1", "child-2"]);
   });
 
+  it.each([
+    { initialKeys: ["child-1"], nextKeys: [] },
+    { initialKeys: ["child-1", "child-2"], nextKeys: [] },
+    { initialKeys: ["child-1"], nextKeys: ["other"] },
+    { initialKeys: ["child-1", "child-2"], nextKeys: ["other"] }
+  ])("recomputes disabled parent summaries after controlled selection changes ($initialKeys -> $nextKeys)", async ({ initialKeys, nextKeys }) => {
+    const { props, state } = createState({
+      data: [
+        { id: "root", label: "Root", disabled: true, children: [
+          { id: "branch", label: "Branch", disabled: true, children: [
+            { id: "child-1", label: "Child 1" },
+            { id: "child-2", label: "Child 2" }
+          ] }
+        ] },
+        { id: "other", label: "Other" }
+      ],
+      multiple: true,
+      modelValue: initialKeys
+    });
+    expect(node(state, "root").checked).not.toBe(CHECK_STATUS_MAP.unchecked);
+
+    props.modelValue = nextKeys;
+    await nextTick();
+
+    expect(state.getCheckedKeys()).toEqual(nextKeys);
+    expect(state.getHalfCheckedKeys()).toEqual([]);
+    expect(node(state, "root").checked).toBe(CHECK_STATUS_MAP.unchecked);
+    expect(node(state, "branch").checked).toBe(CHECK_STATUS_MAP.unchecked);
+  });
+
+  it("keeps disabled leaf selection locked while recomputing parent summaries on clear", async () => {
+    const { props, state } = createState({
+      data: [{ id: "root", label: "Root", disabled: true, children: [
+        { id: "locked", label: "Locked", disabled: true },
+        { id: "child", label: "Child" }
+      ] }],
+      multiple: true,
+      checkedDisabled: true,
+      modelValue: ["locked", "child"]
+    });
+    props.checkedDisabled = false;
+    await nextTick();
+    props.modelValue = [];
+    await nextTick();
+
+    expect(state.getCheckedKeys()).toEqual(["locked"]);
+    expect(state.getHalfCheckedKeys()).toEqual(["root"]);
+  });
+
   it("keeps disabled nodes unchanged while applying configured linked selection", () => {
     const blocked = createState({
       multiple: true,

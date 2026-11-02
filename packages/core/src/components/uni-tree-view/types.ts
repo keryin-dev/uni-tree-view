@@ -209,7 +209,9 @@ export interface UniTreeViewExposed {
   getNodePath: (keyOrNode: TreeKey | TreeNode) => TreeNode[];
   expandAll: () => void;
   collapseAll: () => void;
+  /** 同一节点的并发加载共享在途 Promise；已移除的旧节点不会发起请求。 */
   loadNode: (node: TreeNode) => Promise<TreeDataItem[]>;
+  /** 重试失败节点；加载期间与 loadNode 共享 Promise。 */
   retryLoad: (keyOrNode: TreeKey | TreeNode) => Promise<TreeDataItem[]>;
   /** 返回是否已提交定位指令，不等待原生滚动停稳；不可见目标或被取消的虚拟定位返回 false。 */
   scrollToKey: (key: TreeKey, options?: TreeScrollToOptions) => Promise<boolean>;

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { computed, isReactive, nextTick, watch } from "vue";
 import { CHECK_STATUS_MAP } from "../packages/core/src/components/uni-tree-view/constants";
 import type { TreeDataItem } from "../packages/core/src/components/uni-tree-view/types";
@@ -143,6 +143,118 @@ describe("useTreeViewState: lazy loading", () => {
     await state.loadNode(staticRoot);
     expect(state.treeList.value.map((item) => item.id)).toEqual(["static-root", "fresh-child", "forced-leaf"]);
     expect(node(state, "fresh-child").parentId).toBe("static-root");
+  });
+
+  it.each([
+    { multiple: false, checkStrictly: false, modelValue: "child" },
+    { multiple: true, checkStrictly: true, modelValue: ["child"] },
+    { multiple: true, checkStrictly: false, modelValue: ["child"] }
+  ])("restores controlled selection when lazy loading replaces the same child key ($multiple, $checkStrictly)", async (selection) => {
+    const { state } = createState({
+      data: [{ id: "root", label: "Root", children: [
+        { id: "child", label: "Old child", leaf: true },
+        { id: "other", label: "Other", leaf: true }
+      ] }],
+      ...selection,
+      loadMode: true,
+      alwaysFirstLoad: true,
+      loadApi: () => [
+        { id: "child", label: "Fresh child", leaf: true },
+        { id: "other", label: "Other", leaf: true }
+      ]
+    });
+    const oldChild = node(state, "child");
+    await state.loadNode(node(state, "root"));
+
+    expect(node(state, "child")).not.toBe(oldChild);
+    expect(state.getCheckedKeys()).toEqual(["child"]);
+    expect(node(state, "child").label).toBe("Fresh child");
+    expect(state.pendingCheckChangePayload.value).toBeNull();
+  });
+
+  it("preserves uncontrolled runtime choices when lazy loading replaces static children", async () => {
+    const { state } = createState({
+      data: [{ id: "root", label: "Root", children: [
+        { id: "child", label: "Child", leaf: true },
+        { id: "other", label: "Other", leaf: true }
+      ] }],
+      loadMode: true,
+      alwaysFirstLoad: true,
+      defaultCheckedKeys: ["other"],
+      loadApi: () => [
+        { id: "child", label: "Fresh child", leaf: true },
+        { id: "other", label: "Other", leaf: true }
+      ]
+    });
+    state.checkNode(node(state, "child"));
+    await state.loadNode(node(state, "root"));
+
+    expect(state.getCheckedKeys()).toEqual(["child"]);
+  });
+
+  it("does not inherit a derived parent selection over the controlled child keys", async () => {
+    const { state } = createState({
+      data: [{ id: "root", label: "Root", children: [{ id: "child", label: "Child", leaf: true }] }],
+      multiple: true,
+      modelValue: ["child"],
+      loadMode: true,
+      alwaysFirstLoad: true,
+      loadApi: () => [
+        { id: "child", label: "Fresh child", leaf: true },
+        { id: "new-child", label: "New child", leaf: true }
+      ]
+    });
+    expect(node(state, "root").checked).toBe(CHECK_STATUS_MAP.checked);
+    await state.loadNode(node(state, "root"));
+
+    expect(state.getCheckedKeys()).toEqual(["child"]);
+    expect(state.getHalfCheckedKeys()).toEqual(["root"]);
+  });
+
+  it("keeps an unrelated uncontrolled choice while restoring replacement children", async () => {
+    const { state } = createState({
+      data: [
+        { id: "root", label: "Root", children: [{ id: "child", label: "Child", leaf: true }] },
+        { id: "other", label: "Other", leaf: true }
+      ],
+      multiple: true,
+      checkStrictly: true,
+      loadMode: true,
+      alwaysFirstLoad: true,
+      loadApi: () => [{ id: "child", label: "Fresh child", leaf: true }]
+    });
+    state.setCheckedKeys(["child", "other"]);
+    await state.loadNode(node(state, "root"));
+
+    expect(state.getCheckedKeys()).toEqual(["child", "other"]);
+  });
+
+  it("shares one in-flight state load and its resolved children", async () => {
+    const request = createDeferred<TreeDataItem[]>();
+    const loadApi = vi.fn(() => request.promise);
+    const { state } = createState({ data: createLazyTreeData(), loadMode: true, loadApi });
+    const root = node(state, "lazy-root");
+    const first = state.loadNode(root);
+    const second = state.loadNode(root);
+    expect(second).toBe(first);
+
+    const children = [{ id: "child", label: "Child", leaf: true }];
+    request.resolve(children);
+    expect(await Promise.all([first, second])).toEqual([children, children]);
+    expect(loadApi).toHaveBeenCalledTimes(1);
+    expect(root.loading).toBe(false);
+  });
+
+  it("does not call load-api with a node removed by a data refresh", async () => {
+    const loadApi = vi.fn(() => []);
+    const { props, state } = createState({ data: createLazyTreeData(), loadMode: true, loadApi });
+    const root = node(state, "lazy-root");
+    props.data = [];
+    await nextTick();
+
+    await expect(state.loadNode(root)).resolves.toEqual([]);
+    expect(loadApi).not.toHaveBeenCalled();
+    expect(root.loading).toBe(false);
   });
 
   it("keeps lazy nodes retryable after load failures", async () => {
