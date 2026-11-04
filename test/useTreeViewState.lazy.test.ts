@@ -416,4 +416,97 @@ describe("useTreeViewState: lazy loading", () => {
 
     expect(checkedKeys(state)).toEqual([]);
   });
+
+  it.each([
+    { multiple: false, checkStrictly: false, modelValue: "leaf" },
+    { multiple: true, checkStrictly: true, modelValue: ["leaf"] },
+    { multiple: true, checkStrictly: false, modelValue: ["leaf"] }
+  ])("restores a controlled key after successive lazy replacements ($multiple, $checkStrictly)", async (selection) => {
+    const { state } = createState({
+      data: [{ id: "root", label: "Root", children: [{ id: "branch", label: "Branch", children: [
+        { id: "leaf", label: "Leaf", leaf: true }
+      ] }] }],
+      ...selection,
+      loadMode: true,
+      alwaysFirstLoad: true,
+      loadApi: (target) => target.id === "root"
+        ? [{ id: "branch", label: "Branch", leaf: false }]
+        : [{ id: "leaf", label: "Leaf", leaf: true }, { id: "other", label: "Other", leaf: true }]
+    });
+    await state.loadNode(node(state, "root"));
+    expect(state.getCheckedKeys()).toEqual([]);
+    await state.loadNode(node(state, "branch"));
+    expect(state.getCheckedKeys()).toEqual(["leaf"]);
+    expect(state.pendingCheckChangePayload.value).toBeNull();
+  });
+
+  it.each([null, "other"])("replaces a queued controlled key with the latest value %s", async (nextValue) => {
+    const { props, state } = createState({
+      data: [{ id: "root", label: "Root", children: [{ id: "leaf", label: "Leaf", leaf: true }] }],
+      modelValue: "leaf",
+      loadMode: true,
+      alwaysFirstLoad: true,
+      loadApi: (target) => target.id === "root"
+        ? [{ id: "branch", label: "Branch", leaf: false }]
+        : [{ id: "leaf", label: "Leaf", leaf: true }, { id: "other", label: "Other", leaf: true }]
+    });
+    await state.loadNode(node(state, "root"));
+    props.modelValue = nextValue;
+    await nextTick();
+    await state.loadNode(node(state, "branch"));
+    expect(state.getCheckedKeys()).toEqual(nextValue === null ? [] : [nextValue]);
+  });
+
+  it.each([false, true])("keeps locked disabled selection when replacing a static child (controlled: %s)", async (controlled) => {
+    const { props, state } = createState({
+      data: [{ id: "root", label: "Root", children: [{ id: "locked", label: "Locked", disabled: true, leaf: true }] }],
+      multiple: true,
+      checkStrictly: true,
+      checkedDisabled: true,
+      packDisabledKey: false,
+      ...(controlled ? { modelValue: ["locked"] } : { defaultCheckedKeys: ["locked"] }),
+      loadMode: true,
+      alwaysFirstLoad: true,
+      loadApi: () => [
+        { id: "locked", label: "Fresh locked", disabled: true, leaf: true },
+        { id: "new", label: "New disabled", disabled: true, leaf: true }
+      ]
+    });
+    props.checkedDisabled = false;
+    await nextTick();
+    await state.loadNode(node(state, "root"));
+    expect(node(state, "locked").checked).toBe(CHECK_STATUS_MAP.checked);
+    expect(node(state, "new").checked).toBe(CHECK_STATUS_MAP.unchecked);
+    expect(state.getCheckedKeys()).toEqual([]);
+  });
+
+  it("rebuilds leaf rules and ignores the superseded in-flight request", async () => {
+    const request = createDeferred<TreeDataItem[]>();
+    const { props, state } = createState({
+      data: [{ id: "root", label: "Root" }],
+      modelValue: "root",
+      onlyRadioLeaf: true,
+      loadMode: true,
+      isLeafFn: () => false,
+      loadApi: () => request.promise
+    });
+    const oldRoot = node(state, "root");
+    const pending = state.loadNode(oldRoot);
+    await nextTick();
+    props.isLeafFn = () => true;
+    await nextTick();
+    expect(node(state, "root")).not.toBe(oldRoot);
+    expect(node(state, "root").isLeaf).toBe(true);
+    expect(node(state, "root").loaded).toBe(true);
+    expect(state.isExpandable(node(state, "root"))).toBe(false);
+    expect(state.getCheckedKeys()).toEqual(["root"]);
+    request.resolve([{ id: "stale", label: "Stale" }]);
+    await pending;
+    expect(state.getNode("stale")).toBeUndefined();
+    props.isLeafFn = () => false;
+    await nextTick();
+    expect(node(state, "root").loaded).toBe(false);
+    expect(state.isExpandable(node(state, "root"))).toBe(true);
+    expect(state.getCheckedKeys()).toEqual([]);
+  });
 });

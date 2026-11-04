@@ -28,7 +28,7 @@ export declare function getPlatform(): IPlatform[keyof IPlatform];
 
 export declare const platform: ReturnType<typeof getPlatform>;
 
-/** App */
+/** App，包含具体 App 平台。 */
 export declare const isApp: boolean;
 /** App Android */
 export declare const isAppAndroid: boolean;
@@ -38,7 +38,7 @@ export declare const isAppIos: boolean;
 export declare const isAppHarmony: boolean;
 /** Web */
 export declare const isWeb: boolean;
-/** 小程序 */
+/** 小程序，包含微信、支付宝等具体平台。 */
 export declare const isMp: boolean;
 /** 微信小程序 */
 export declare const isMpWeixin: boolean;
@@ -62,7 +62,7 @@ export declare const isMp360: boolean;
 export declare const isMpXhs: boolean;
 /** 鸿蒙元服务 */
 export declare const isMpHarmony: boolean;
-/** 快应用 */
+/** 快应用，包含联盟与华为平台。 */
 export declare const isQuickappWebview: boolean;
 /** 快应用联盟 */
 export declare const isQuickappWebviewUnion: boolean;

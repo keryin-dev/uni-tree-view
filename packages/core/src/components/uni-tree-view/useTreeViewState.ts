@@ -47,8 +47,8 @@ export function useTreeViewState(props: TreeViewStateProps) {
   const nodeMap = ref<Map<TreeKey, TreeNode>>(new Map());
   // 按节点对象隔离请求，同 key 的替换节点不会复用旧树的加载结果。
   const loadingNodes = new WeakMap<TreeNode, Promise<TreeDataItem[]>>();
-  // 只在重建时读写，不参与渲染，无需响应式。
-  const cachedExpandedKeys = new Set<TreeKey>();
+  // 同时记录展开和收起，区分已有节点的运行时状态与新节点的默认值。
+  const cachedExpandedState = new Map<TreeKey, boolean>();
   // 目标节点尚未加载出来的选中 key 暂存于此，等懒加载补齐节点后再落地为真实选中态。
   let pendingCheckedKeys = new Set<TreeKey>();
   // 上述待选 key 中来自 setCheckedKeys 等命令式调用的子集：落地后需要额外抛出选中事件，
@@ -76,6 +76,7 @@ export function useTreeViewState(props: TreeViewStateProps) {
   watch(
     () => [
       props.data,
+      props.isLeafFn,
       getTreeConfigSignature()
     ] as const,
     () => {
@@ -89,6 +90,7 @@ export function useTreeViewState(props: TreeViewStateProps) {
   watch(
     () => getExpansionConfigSignature(),
     () => {
+      cachedExpandedState.clear();
       applyExpandedState();
     }
   );
@@ -123,6 +125,7 @@ export function useTreeViewState(props: TreeViewStateProps) {
         : getInitialCheckedKeys();
     const pendingKeys = preserveRuntimeChecked ? [...pendingCheckedKeys] : checkedKeys;
     const imperativeKeys = [...pendingImperativeCheckedKeys];
+    const lockedStates = getLockedCheckedStates();
     syncCachedExpandedKeys();
     childrenMap.value = new Map();
     nodeMap.value = new Map();
@@ -131,12 +134,13 @@ export function useTreeViewState(props: TreeViewStateProps) {
     treeVersion.value += 1;
     initialized = true;
     applyCheckedState(checkedKeys);
+    restoreLockedCheckedStates(lockedStates);
     pendingCheckedKeys = new Set(pendingKeys.filter((key) => !nodeMap.value.has(key)));
     const resolvedImperativeKeys = imperativeKeys.filter((key) => nodeMap.value.has(key));
     pendingImperativeCheckedKeys = new Set(
       imperativeKeys.filter((key) => pendingCheckedKeys.has(key))
     );
-    applyExpandedState();
+    applyExpandedState(true);
     publishPendingSelectionChange(resolvedImperativeKeys);
     reconcileMissingControlledKeys(wasInitialized, checkedKeys);
     triggerRef(nodeMap);
@@ -162,13 +166,7 @@ export function useTreeViewState(props: TreeViewStateProps) {
     }
 
     node.expanded = nextExpanded;
-    if (props.cacheExpandedKeys) {
-      if (node.expanded) {
-        cachedExpandedKeys.add(node.id);
-      } else {
-        cachedExpandedKeys.delete(node.id);
-      }
-    }
+    syncExpandedCacheForNode(node);
     updateVisibility();
     return {
       expanded: node.expanded,
@@ -365,7 +363,7 @@ export function useTreeViewState(props: TreeViewStateProps) {
     publishPendingSelectionChange(resolvedImperativeKeys);
   }
 
-  function applyExpandedState() {
+  function applyExpandedState(preserveCachedState = false) {
     const defaultExpandedKeys = normalizeKeys(props.defaultExpandedKeys);
     const expandedKeySet = new Set<TreeKey>(defaultExpandedKeys);
 
@@ -383,26 +381,25 @@ export function useTreeViewState(props: TreeViewStateProps) {
     }
 
     const expandAll = Boolean(props.defaultExpandAll);
-    const useCachedKeys = Boolean(props.cacheExpandedKeys);
+    const useCachedState = preserveCachedState && Boolean(props.cacheExpandedKeys);
     const nodes = treeList.value;
     const rawNodes = toRaw(nodes);
     for (let index = 0; index < rawNodes.length; index += 1) {
       // 读原始对象、仅在值变化时经代理写入，避免对整棵树逐节点触发响应式 set。
       const rawNode = toRaw(rawNodes[index]);
-      const expanded = expandAll
-        || expandedKeySet.has(rawNode.id)
-        || (useCachedKeys && cachedExpandedKeys.has(rawNode.id));
+      const expanded = (useCachedState ? cachedExpandedState.get(rawNode.id) : undefined)
+        ?? (expandAll || expandedKeySet.has(rawNode.id));
       if (rawNode.expanded !== expanded) {
         nodes[index].expanded = expanded;
       }
     }
 
-    applyExpandCheckedState();
+    applyExpandCheckedState(useCachedState);
 
     updateVisibility();
   }
 
-  function applyExpandCheckedState() {
+  function applyExpandCheckedState(useCachedState: boolean) {
     if (!props.expandChecked) {
       return;
     }
@@ -410,7 +407,7 @@ export function useTreeViewState(props: TreeViewStateProps) {
     for (const node of getCheckedNodes()) {
       for (const parentId of node.parentIds) {
         const parent = nodeMap.value.get(parentId);
-        if (parent) {
+        if (parent && !(useCachedState && cachedExpandedState.has(parentId))) {
           parent.expanded = true;
         }
       }
@@ -595,17 +592,38 @@ export function useTreeViewState(props: TreeViewStateProps) {
   }
 
   function syncCachedExpandedKeys() {
+    cachedExpandedState.clear();
     if (!props.cacheExpandedKeys) {
       return;
     }
 
     for (const node of treeList.value) {
-      if (node.expanded) {
-        cachedExpandedKeys.add(node.id);
-      } else {
-        cachedExpandedKeys.delete(node.id);
+      cachedExpandedState.set(node.id, node.expanded);
+    }
+  }
+
+  function getLockedCheckedStates() {
+    const states = new Map<TreeKey, CheckStatus>();
+    if (!props.checkedDisabled) {
+      for (const item of toRaw(treeList.value)) {
+        const node = toRaw(item);
+        if (node.disabled && node.checked !== CHECK_STATUS_MAP.unchecked) {
+          states.set(node.id, node.checked);
+        }
       }
     }
+    return states;
+  }
+
+  function restoreLockedCheckedStates(states: Map<TreeKey, CheckStatus>) {
+    // 迁移同 key 禁用节点的旧状态；新节点仍由常规选择规则决定，父节点继续汇总。
+    for (const [key, status] of states) {
+      const node = nodeMap.value.get(key);
+      if (node?.disabled) {
+        node.checked = status;
+      }
+    }
+    updateParentNodesStatus([...states.keys()]);
   }
 
   function canSelectNode(node: TreeNode) {
@@ -699,8 +717,7 @@ export function useTreeViewState(props: TreeViewStateProps) {
       multiple: props.multiple,
       checkStrictly: props.checkStrictly,
       onlyRadioLeaf: props.onlyRadioLeaf,
-      checkedDisabled: props.checkedDisabled,
-      packDisabledKey: resolvedPackDisabledKey.value
+      checkedDisabled: props.checkedDisabled
     });
   }
 
@@ -1018,11 +1035,7 @@ export function useTreeViewState(props: TreeViewStateProps) {
       return;
     }
 
-    if (node.expanded) {
-      cachedExpandedKeys.add(node.id);
-    } else {
-      cachedExpandedKeys.delete(node.id);
-    }
+    cachedExpandedState.set(node.id, node.expanded);
   }
 
   function expandAll() {
@@ -1105,6 +1118,7 @@ export function useTreeViewState(props: TreeViewStateProps) {
     const checkedKeys = hasChildren(node.id)
       ? props.modelValue !== undefined ? getInitialCheckedKeys() : getRawCheckedKeys()
       : null;
+    const lockedStates = checkedKeys ? getLockedCheckedStates() : new Map<TreeKey, CheckStatus>();
     removeDescendants(node.id);
 
     const childNodes = flattenTree(children, node.level + 1, [...node.parentIds, node.id], [...node.parents, node.source]);
@@ -1121,6 +1135,14 @@ export function useTreeViewState(props: TreeViewStateProps) {
     node.loaded = true;
     if (checkedKeys) {
       applyCheckedState(checkedKeys);
+      restoreLockedCheckedStates(lockedStates);
+      if (props.modelValue !== undefined) {
+        for (const key of checkedKeys) {
+          if (!nodeMap.value.has(key)) {
+            pendingCheckedKeys.add(key);
+          }
+        }
+      }
     } else if (shouldInheritChecked) {
       updateNodeAndDescendantsStatus(childNodes.map((child) => child.id), CHECK_STATUS_MAP.checked);
     }

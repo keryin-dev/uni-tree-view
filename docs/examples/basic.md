@@ -70,6 +70,8 @@ const treeData = ref([
 
 之后如果修改 `default-expanded-keys`，组件会按新值重新设置整棵树的展开状态，覆盖用户手动展开或收起的结果。需要在运行时只改变部分节点时，请使用 [`setExpandedKeys`](/apis/methods#展开)。
 
+开启 `cache-expanded-keys` 后，替换 `data` 会保留同 key 节点的展开和收起状态，包括用户收起的默认展开节点；新节点使用默认展开配置。显式修改默认展开配置仍会重设状态。
+
 ## 禁用节点
 
 数据中 `disabled: true` 的节点会置灰。`checked-disabled` 默认为 `false`，因此用户点击、全选、清空、父子联动、实例方法和外部更新 `v-model`，都不会改变它的选中状态。示例数据里的「顾宁」就是这样：

@@ -93,8 +93,8 @@ export function getPlatform() {
 
 export const platform = getPlatform();
 
-/** App */
-export const isApp = platform === Platform.APP;
+/** App，包含具体 App 平台。 */
+export const isApp = platform === Platform.APP || platform.startsWith(`${Platform.APP}-`);
 /** App Android */
 export const isAppAndroid = platform === Platform.APP_ANDROID;
 /** App iOS */
@@ -103,8 +103,8 @@ export const isAppIos = platform === Platform.APP_IOS;
 export const isAppHarmony = platform === Platform.APP_HARMONY;
 /** Web */
 export const isWeb = platform === Platform.WEB;
-/** 小程序 */
-export const isMp = platform === Platform.MP;
+/** 小程序，包含微信、支付宝等具体平台。 */
+export const isMp = platform === Platform.MP || platform.startsWith(`${Platform.MP}-`);
 /** 微信小程序 */
 export const isMpWeixin = platform === Platform.MP_WEIXIN;
 /** 支付宝小程序 */
@@ -127,8 +127,8 @@ export const isMp360 = platform === Platform.MP_360;
 export const isMpXhs = platform === Platform.MP_XHS;
 /** 鸿蒙元服务 */
 export const isMpHarmony = platform === Platform.MP_HARMONY;
-/** 快应用 */
-export const isQuickappWebview = platform === Platform.QUICKAPP_WEBVIEW;
+/** 快应用，包含联盟与华为平台。 */
+export const isQuickappWebview = platform === Platform.QUICKAPP_WEBVIEW || platform.startsWith(`${Platform.QUICKAPP_WEBVIEW}-`);
 /** 快应用联盟 */
 export const isQuickappWebviewUnion = platform === Platform.QUICKAPP_WEBVIEW_UNION;
 /** 快应用华为 */

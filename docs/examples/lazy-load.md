@@ -26,7 +26,7 @@ pageClass: examples-page
     check-on-click-node
     :data="rootData"
     :load-api="loadChildren"
-    :is-leaf-fn="item => item.type === 'city'"
+    :is-leaf-fn="isCityLeaf"
     theme-color="#299764"
     @load="onLoad"
     @load-error="onLoadError"
@@ -34,6 +34,12 @@ pageClass: examples-page
 </template>
 
 <script setup>
+import UniTreeView from "uni-tree-view";
+
+function isCityLeaf(item) {
+  return item.type === "city";
+}
+
 // 首屏只给根节点：type 用来区分「可继续展开的区域」和「已经是叶子的城市」
 const rootData = [
   { id: "north", label: "华北区域", append: "2 城市", type: "region" },
@@ -99,9 +105,11 @@ async function loadChildren(node) {
   load-mode
   :data="rootData"
   :load-api="loadChildren"
-  :is-leaf-fn="item => item.type === 'city'"
+  :is-leaf-fn="isCityLeaf"
 />
 ```
+
+上面的 `isCityLeaf` 与完整示例使用同一函数。请在 script 中声明稳定的函数引用；替换 `is-leaf-fn` 的函数引用会按当前 `data` 重新解析整棵树，并丢弃旧树的在途加载结果。函数闭包内的数据变化不会自动触发重建，需要替换函数或 `data` 根引用。
 
 `is-leaf-fn` 的第一个参数是原始数据项，第二个参数是组件内部节点对象：`(item, node) => boolean`。右侧预览就是用它把 `type` 为 `city` 的节点识别为叶子，所以城市前面没有展开箭头。
 
@@ -154,7 +162,7 @@ function onError({ node }) {
 <uni-tree-view load-mode always-first-load :data="rootData" :load-api="loadChildren" />
 ```
 
-异步结果会替换原有子树。新旧节点使用相同 key 且仍满足选择规则时，会恢复受控值指定的选择；未绑定 `v-model` 时保留当前运行时选择，不会重新应用已经取消的默认选择。
+异步结果会替换原有子树。新旧节点使用相同 key 且仍满足选择规则时，会恢复受控值指定的选择；未绑定 `v-model` 时保留当前运行时选择，不会重新应用已经取消的默认选择。若受控 key 对应的后代暂时被移除，它仍会等待后续加载；期间更新或清空 `v-model` 会取代旧的等待选择。
 
 ## 与虚拟渲染组合
 

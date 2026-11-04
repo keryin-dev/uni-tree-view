@@ -50,7 +50,7 @@ interface TreeProps {
 | `expand-checked` | `boolean` | `false` | 初始是否展开已选节点的祖先链 |
 | `expand-on-click-node` | `boolean` | `false` | 点击整行是否展开/收起 |
 | `accordion` | `boolean` | `false` | 展开一个节点时是否自动收起同级已展开节点；只影响运行时展开操作，不改变默认展开配置的语义 |
-| `cache-expanded-keys` | `boolean` | `false` | 数据重建时保留运行时展开状态 |
+| `cache-expanded-keys` | `boolean` | `false` | 数据重建时保留同 key 节点的展开和收起状态；显式修改默认展开配置会重设状态 |
 
 ## 过滤
 
@@ -66,7 +66,7 @@ interface TreeProps {
 | --- | --- | --- | --- |
 | `load-mode` | `boolean` | `false` | 开启懒加载模式，需配合 `load-api`；仅提供加载函数或仅监听事件不会启用懒加载 |
 | `load-api` | `(node) => TreeDataItem[] \| Promise<...>` | - | 子节点加载函数，只有 `load-mode=true` 时才会在展开节点时调用 |
-| `is-leaf-fn` | `(item, node) => boolean` | - | 自定义叶子节点判断 |
+| `is-leaf-fn` | `(item, node) => boolean` | - | 自定义叶子节点判断；替换函数引用会按当前 data 重建状态树，请传入稳定函数 |
 | `always-first-load` | `boolean` | `false` | 首次展开时即使已有静态 children 也执行加载 |
 
 ## 外观

@@ -152,19 +152,19 @@ export interface UniTreeViewProps {
   defaultExpandParent?: boolean;
   /** Expand ancestors of checked nodes initially. */
   expandChecked?: boolean;
-  /** Preserve runtime expanded state when tree data is rebuilt. */
+  /** Preserve expanded and collapsed states on data rebuild; explicit expansion defaults reset them. */
   cacheExpandedKeys?: boolean;
   /** Lazy load mode. Nodes can be expanded before children exist. */
   loadMode?: boolean;
   /** Lazy load function. */
   loadApi?: (node: TreeNode) => TreeDataItem[] | Promise<TreeDataItem[]>;
-  /** Custom leaf resolver. */
+  /** Custom leaf resolver. Replacing the function rebuilds from data; use a stable reference. */
   isLeafFn?: (item: TreeDataItem, node: TreeNode) => boolean;
   /** Load once on first expand even when static children exist. */
   alwaysFirstLoad?: boolean;
   /** Whether disabled nodes can participate in selection state changes. */
   checkedDisabled?: boolean;
-  /** Whether checked disabled nodes are included in returned keys/nodes. */
+  /** Whether checked disabled nodes are included in returned keys/nodes; changing it preserves internal selection. */
   packDisabledKey?: boolean;
   /** Custom class name added to every node row. */
   nodeClass?: string;

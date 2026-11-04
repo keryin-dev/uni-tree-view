@@ -45,7 +45,9 @@ function selectAll() {
 
 `pack-disabled-key=false` 会把已选禁用节点从 `getCheckedKeys/getCheckedNodes`、`check-change` 和 `v-model` 中排除，但不会取消其内部/视觉选中状态。禁用父节点仍可能因子节点全部选中而显示为全选。
 
-非严格多选中的禁用父节点会继续汇总子节点状态。外部清空或替换 `v-model` 后，它的全选/半选状态也会重新计算；禁用叶节点仍遵循选中状态锁定规则。
+运行时修改 `pack-disabled-key` 只改变查询和后续事件的返回结果，不重置内部选择，也不单独触发选择事件。
+
+非严格多选中的禁用父节点会继续汇总子节点状态。外部清空或替换 `v-model` 后，它的全选/半选状态也会重新计算；禁用叶节点仍遵循选中状态锁定规则。同 key 且仍禁用的节点在数据重建或静态子树被懒加载替换时，会保留已锁定的选中状态；首次出现的禁用节点不会因此被选中。
 
 ## 展开
 
@@ -80,7 +82,7 @@ function selectAll() {
 | `retryLoad` | `(keyOrNode) => Promise<TreeDataItem[]>` | 重试加载失败的节点 |
 | `scrollToKey` | `(key, options?: { expandParents? }) => Promise<boolean>` | 滚动到指定节点（虚拟与普通模式均可用），`expandParents` 默认 `true`，先展开已加载的祖先链后定位 |
 
-同一节点加载期间，`loadNode` 和 `retryLoad` 的并发调用共享同一个在途 Promise，并取得相同的子节点数组或失败结果；一次实际请求只触发一次 `load` 或 `load-error`。失败后可再次调用重试。传入已从当前树移除的旧节点不会发起请求。
+同一节点加载期间，`loadNode` 和 `retryLoad` 的并发调用共享同一个在途 Promise，并取得相同的子节点数组或失败结果；一次实际请求只触发一次 `load` 或 `load-error`。失败后可再次调用重试，也可以在 `load-error` 回调中立即重试。传入已从当前树移除的旧节点不会发起请求。
 
 `scrollToKey` 只能定位当前已经进入状态树的节点；目标 key 尚未通过懒加载创建时返回 `false`，且不会为了查找目标而自动加载后代。目标被筛选隐藏，或设置 `expandParents: false` 后仍不可见时，也返回 `false`。
 

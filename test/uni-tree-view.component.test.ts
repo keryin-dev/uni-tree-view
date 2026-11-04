@@ -875,4 +875,75 @@ describe("uni-tree-view component", () => {
 
     expect(wrapper.find(".utv-tree-item").attributes("id")).not.toBe(firstId);
   });
+
+  it("starts a shared fresh retry from load-error without clearing it after the old request settles", async () => {
+    const children = [{ id: "child", label: "Child", leaf: true }];
+    const request = createDeferred<typeof children>();
+    const failure = new Error("temporary failure");
+    let calls = 0;
+    let retry: ReturnType<UniTreeViewExposed["retryLoad"]> | undefined;
+    let concurrentRetry: ReturnType<UniTreeViewExposed["retryLoad"]> | undefined;
+    let tree: UniTreeViewExposed;
+    const wrapper = mount(UniTreeView, { props: {
+      data: [{ id: "root", label: "Root", leaf: false }],
+      loadMode: true,
+      loadApi: () => {
+        calls += 1;
+        if (calls === 1) {
+          throw failure;
+        }
+        return request.promise;
+      },
+      onLoadError: ({ node }: TreeLoadErrorPayload) => {
+        retry = tree.retryLoad(node.id);
+        concurrentRetry = tree.loadNode(node);
+      }
+    } });
+    tree = exposed(wrapper);
+    await expect(tree.loadNode(tree.getNode("root")!)).rejects.toBe(failure);
+    expect(retry).toBeDefined();
+    expect(concurrentRetry).toBe(retry);
+    expect(tree.retryLoad("root")).toBe(retry);
+    expect(calls).toBe(2);
+    request.resolve(children);
+    expect(await retry).toEqual(children);
+    expect(wrapper.emitted("load-error")).toHaveLength(1);
+    expect(wrapper.emitted("load")).toHaveLength(1);
+    wrapper.unmount();
+  });
+
+  it("restores a controlled descendant after successive lazy replacements without selection events", async () => {
+    const wrapper = mount(UniTreeView, { props: {
+      data: [{ id: "root", label: "Root", children: [{ id: "leaf", label: "Leaf", leaf: true }] }],
+      modelValue: "leaf",
+      loadMode: true,
+      alwaysFirstLoad: true,
+      loadApi: (node) => node.id === "root"
+        ? [{ id: "branch", label: "Branch", leaf: false }]
+        : [{ id: "leaf", label: "Leaf", leaf: true }]
+    } });
+    const tree = exposed(wrapper);
+    await tree.loadNode(tree.getNode("root")!);
+    await tree.loadNode(tree.getNode("branch")!);
+    await nextTick();
+    expect(tree.getCheckedKeys()).toEqual(["leaf"]);
+    expect(wrapper.emitted("update:modelValue")).toBeUndefined();
+    expect(wrapper.emitted("check-change")).toBeUndefined();
+    wrapper.unmount();
+  });
+
+  it("leaves runtime selection and events unchanged when packing changes", async () => {
+    const wrapper = mount(UniTreeView, { props: {
+      data: [{ id: "a", label: "A" }],
+      multiple: true,
+      defaultCheckedKeys: ["a"]
+    } });
+    const tree = exposed(wrapper);
+    tree.setCheckedKeys("a", false);
+    await wrapper.setProps({ packDisabledKey: false });
+    expect(tree.getCheckedKeys()).toEqual([]);
+    expect(wrapper.emitted("update:modelValue")).toEqual([[[]]]);
+    expect(wrapper.emitted("check-change")).toHaveLength(1);
+    wrapper.unmount();
+  });
 });

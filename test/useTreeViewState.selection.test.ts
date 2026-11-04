@@ -464,4 +464,50 @@ describe("useTreeViewState: selection", () => {
     expect(payload?.keys).toEqual([]);
     expect(allowed.state.getCheckedKeys()).toEqual([]);
   });
+
+  it.each([false, true])("preserves locked disabled keys on data refresh (controlled: %s)", async (controlled) => {
+    const data = () => [{ id: "root", label: "Root", children: [
+      { id: "locked", label: "Locked", disabled: true },
+      { id: "other", label: "Other" },
+      { id: "new", label: "New disabled", disabled: true }
+    ] }];
+    const { props, state } = createState({
+      data: data(),
+      multiple: true,
+      checkedDisabled: true,
+      packDisabledKey: false,
+      ...(controlled ? { modelValue: ["locked"] } : { defaultCheckedKeys: ["locked"] })
+    });
+    props.checkedDisabled = false;
+    await nextTick();
+    props.data = data();
+    await nextTick();
+    expect(node(state, "locked").checked).toBe(CHECK_STATUS_MAP.checked);
+    expect(node(state, "new").checked).toBe(CHECK_STATUS_MAP.unchecked);
+    expect(state.getCheckedKeys()).toEqual([]);
+    expect(state.getHalfCheckedKeys()).toEqual(["root"]);
+  });
+
+  it("changes packing without replaying uncontrolled defaults or losing runtime choices", async () => {
+    const { props, state } = createState({
+      data: [{ id: "root", label: "Root", children: [
+        { id: "default", label: "Default" },
+        { id: "chosen", label: "Chosen" },
+        { id: "locked", label: "Locked", disabled: true }
+      ] }],
+      multiple: true,
+      checkedDisabled: true,
+      defaultCheckedKeys: ["default"]
+    });
+    state.setCheckedKeys("default", false);
+    state.setCheckedKeys(["chosen", "locked"]);
+    for (const includeDisabled of [false, true]) {
+      props.packDisabledKey = includeDisabled;
+      await nextTick();
+      expect(state.getCheckedKeys()).toEqual(includeDisabled ? ["chosen", "locked"] : ["chosen"]);
+      expect(node(state, "default").checked).toBe(CHECK_STATUS_MAP.unchecked);
+      expect(node(state, "locked").checked).toBe(CHECK_STATUS_MAP.checked);
+      expect(state.getHalfCheckedKeys()).toEqual(["root"]);
+    }
+  });
 });

@@ -430,14 +430,21 @@ function loadNode(node: TreeNode): Promise<TreeDataItem[]> {
   const shouldLoad = !node.loaded && !node.loading;
   // 事件与实际请求绑定，所有调用方共享同一个结果，避免并发调用重复发送成功或失败事件。
   const request = loadStateNode(node).then((children) => {
+    if (loadingNodes.get(node) === request) {
+      loadingNodes.delete(node);
+    }
     if (shouldLoad && node.loaded && getNode(node.id) === node) {
       emit("load", { node, children });
     }
     return children;
   }, (error: unknown) => {
+    // 失败事件内可以立即重试；旧请求的清理不能覆盖重入创建的新请求。
+    if (loadingNodes.get(node) === request) {
+      loadingNodes.delete(node);
+    }
     emit("load-error", { node, error });
     throw error;
-  }).finally(() => loadingNodes.delete(node));
+  });
   loadingNodes.set(node, request);
   return request;
 }

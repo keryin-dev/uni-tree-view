@@ -35,7 +35,7 @@
         check-on-click-node
         :data="rootData"
         :load-api="loadChildren"
-        :is-leaf-fn="item => item.type === 'city'"
+        :is-leaf-fn="isCityLeaf"
         theme-color="#299764"
         @load="onLoad"
         @load-error="onLoadError"></uni-tree-view>
@@ -58,7 +58,7 @@
 
 <script setup lang="ts">
 import UniTreeView from "uni-tree-view";
-import type { UniTreeViewExposed } from "uni-tree-view";
+import type { TreeDataItem, UniTreeViewExposed } from "uni-tree-view";
 import { computed, nextTick, shallowRef } from "vue";
 
 interface AreaItem {
@@ -109,6 +109,10 @@ const loadDetail = computed(() => {
   }
   return "已加载的节点再次展开不会重复请求";
 });
+
+function isCityLeaf(item: TreeDataItem) {
+  return item.type === "city";
+}
 
 async function loadChildren(node: { id: string | number; label: string }) {
   loading.value = true;

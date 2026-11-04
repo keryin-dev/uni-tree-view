@@ -423,4 +423,36 @@ describe("useTreeViewState: structure, expansion and filtering", () => {
     expect(warn.mock.calls.filter(([message]) => String(message).includes("重复节点 key"))).toHaveLength(1);
     warn.mockRestore();
   });
+
+  it.each([
+    { defaultExpandedKeys: ["building-a"] },
+    { defaultExpandAll: true },
+    { expandChecked: true, defaultCheckedKeys: ["room-a-101"] }
+  ])("preserves a cached collapse over expansion defaults %j", async (defaults) => {
+    const { props, state } = createState({ cacheExpandedKeys: true, ...defaults });
+    state.setExpandedKeys(["building-a"], false);
+    props.data = [...createTreeData(), { id: "new-root", label: "New", children: [{ id: "new-child", label: "New child" }] }];
+    await nextTick();
+    expect(node(state, "building-a").expanded).toBe(false);
+    expect(node(state, "new-root").expanded).toBe(Boolean(defaults.defaultExpandAll));
+    expect(visibleKeys(state)).not.toContain("room-a-101");
+  });
+
+  it("resets cached states when expansion defaults change explicitly", async () => {
+    const { props, state } = createState({ cacheExpandedKeys: true, defaultExpandedKeys: ["building-a"] });
+    state.collapseAll();
+    state.setExpandedKeys(["building-b"], true);
+    props.defaultExpandedKeys = ["building-a", "floor-a-1"];
+    await nextTick();
+    expect(state.getExpandedKeys()).toEqual(["building-a", "floor-a-1"]);
+    props.data = createTreeData();
+    await nextTick();
+    expect(state.getExpandedKeys()).toEqual(["building-a", "floor-a-1"]);
+    props.cacheExpandedKeys = false;
+    await nextTick();
+    state.collapseAll();
+    props.data = createTreeData();
+    await nextTick();
+    expect(state.getExpandedKeys()).toEqual(["building-a", "floor-a-1"]);
+  });
 });
