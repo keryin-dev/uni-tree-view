@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { flushPromises, mount } from "@vue/test-utils";
 import { describe, expect, it } from "vitest";
-import { nextTick } from "vue";
+import { defineComponent, nextTick, ref } from "vue";
 import type {
   TreeCheckChangePayload,
   TreeExpandPayload,
@@ -945,5 +945,57 @@ describe("uni-tree-view component", () => {
     expect(wrapper.emitted("update:modelValue")).toEqual([[[]]]);
     expect(wrapper.emitted("check-change")).toHaveLength(1);
     wrapper.unmount();
+  });
+
+  it.each([false, true])("preserves lazy nodes across parent rerenders with an inline leaf resolver (loaded: %s)", async (loaded) => {
+    const request = createDeferred<TreeLoadPayload["children"]>();
+    const children = [{ id: "child", label: "Child", leaf: true }];
+    let calls = 0;
+    const parent = mount(defineComponent({
+      components: { UniTreeView },
+      setup() {
+        const revision = ref(0);
+        const data = [{ id: "root", label: "Root", leaf: false }];
+        const loadApi = () => {
+          calls += 1;
+          return request.promise;
+        };
+        return { revision, data, loadApi };
+      },
+      template: `
+        <button @click="revision += 1">{{ revision }}</button>
+        <UniTreeView :data="data" load-mode :load-api="loadApi" :is-leaf-fn="item => item.leaf === true" />
+      `
+    }));
+    try {
+      const wrapper = parent.getComponent(UniTreeView);
+      const tree = wrapper.vm as unknown as UniTreeViewExposed;
+      const root = tree.getNode("root")!;
+      tree.setExpandedKeys(["root"], true);
+      const pending = tree.loadNode(root);
+      if (loaded) {
+        request.resolve(children);
+        await pending;
+      }
+      const previousResolver = wrapper.props("isLeafFn");
+      await parent.get("button").trigger("click");
+      expect(wrapper.props("isLeafFn")).not.toBe(previousResolver);
+      expect(tree.getNode("root")).toBe(root);
+      expect(root.expanded).toBe(true);
+      if (!loaded) {
+        expect(root.loading).toBe(true);
+        expect(tree.loadNode(root)).toBe(pending);
+        request.resolve(children);
+        await pending;
+      }
+      expect(tree.getVisibleKeys()).toEqual(["root", "child"]);
+      expect(tree.getNode("child")?.isLeaf).toBe(true);
+      expect(wrapper.text()).toContain("Child");
+      expect(calls).toBe(1);
+      expect(wrapper.emitted("load")).toHaveLength(1);
+      expect(wrapper.emitted("load-error")).toBeUndefined();
+    } finally {
+      parent.unmount();
+    }
   });
 });

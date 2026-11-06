@@ -455,4 +455,40 @@ describe("useTreeViewState: structure, expansion and filtering", () => {
     await nextTick();
     expect(state.getExpandedKeys()).toEqual(["building-a", "floor-a-1"]);
   });
+
+  it.each([false, true])("restores cached expansion after a node leaves and returns (expanded: %s)", async (expanded) => {
+    const { props, state } = createState({ cacheExpandedKeys: true, defaultExpandAll: !expanded });
+    state.setExpandedKeys(["building-a"], expanded);
+    props.data = createTreeData().filter((item) => item.id !== "building-a");
+    await nextTick();
+    expect(state.getNode("building-a")).toBeUndefined();
+    props.data = [];
+    await nextTick();
+    props.data = [...createTreeData(), { id: "new", label: "New", children: [{ id: "new-child", label: "New child" }] }];
+    await nextTick();
+    expect(node(state, "building-a").expanded).toBe(expanded);
+    expect(node(state, "new").expanded).toBe(!expanded);
+    expect(visibleKeys(state).includes("floor-a-1")).toBe(expanded);
+  });
+
+  it.each(["defaults", "cache"])("clears absent-node expansion when resetting %s", async (reset) => {
+    const { props, state } = createState({ cacheExpandedKeys: true });
+    state.setExpandedKeys(["building-a"], true);
+    props.data = [];
+    await nextTick();
+    if (reset === "defaults") {
+      props.defaultExpandedKeys = ["building-b"];
+    } else {
+      props.cacheExpandedKeys = false;
+    }
+    await nextTick();
+    if (reset === "cache") {
+      props.cacheExpandedKeys = true;
+      await nextTick();
+    }
+    props.data = createTreeData();
+    await nextTick();
+    expect(node(state, "building-a").expanded).toBe(false);
+    expect(node(state, "building-b").expanded).toBe(reset === "defaults");
+  });
 });

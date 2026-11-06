@@ -73,10 +73,10 @@ export function useTreeViewState(props: TreeViewStateProps) {
   // 未显式传入时默认打包已选中的禁用节点，保持与历史行为一致。
   const resolvedPackDisabledKey = computed(() => props.packDisabledKey ?? true);
 
+  // 叶子函数可由父模板内联传入，引用变化不代表 data 变化，不能清空已加载子树。
   watch(
     () => [
       props.data,
-      props.isLeafFn,
       getTreeConfigSignature()
     ] as const,
     () => {
@@ -592,11 +592,12 @@ export function useTreeViewState(props: TreeViewStateProps) {
   }
 
   function syncCachedExpandedKeys() {
-    cachedExpandedState.clear();
     if (!props.cacheExpandedKeys) {
+      cachedExpandedState.clear();
       return;
     }
 
+    // 普通数据刷新保留暂时缺席节点的状态；显式重设展开配置时再清空缓存。
     for (const node of treeList.value) {
       cachedExpandedState.set(node.id, node.expanded);
     }

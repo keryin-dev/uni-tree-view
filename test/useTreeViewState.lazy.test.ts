@@ -480,7 +480,7 @@ describe("useTreeViewState: lazy loading", () => {
     expect(state.getCheckedKeys()).toEqual([]);
   });
 
-  it("rebuilds leaf rules and ignores the superseded in-flight request", async () => {
+  it("recomputes leaf rules only after data refresh and ignores the superseded request", async () => {
     const request = createDeferred<TreeDataItem[]>();
     const { props, state } = createState({
       data: [{ id: "root", label: "Root" }],
@@ -495,6 +495,11 @@ describe("useTreeViewState: lazy loading", () => {
     await nextTick();
     props.isLeafFn = () => true;
     await nextTick();
+    expect(node(state, "root")).toBe(oldRoot);
+    expect(oldRoot.isLeaf).toBe(false);
+    expect(oldRoot.loading).toBe(true);
+    props.data = [...props.data!];
+    await nextTick();
     expect(node(state, "root")).not.toBe(oldRoot);
     expect(node(state, "root").isLeaf).toBe(true);
     expect(node(state, "root").loaded).toBe(true);
@@ -505,8 +510,27 @@ describe("useTreeViewState: lazy loading", () => {
     expect(state.getNode("stale")).toBeUndefined();
     props.isLeafFn = () => false;
     await nextTick();
+    expect(node(state, "root").isLeaf).toBe(true);
+    props.data = [...props.data!];
+    await nextTick();
     expect(node(state, "root").loaded).toBe(false);
     expect(state.isExpandable(node(state, "root"))).toBe(true);
     expect(state.getCheckedKeys()).toEqual([]);
+  });
+
+  it("uses the latest leaf resolver for new lazy children without rebuilding existing nodes", async () => {
+    const { props, state } = createState({
+      data: [{ id: "root", label: "Root" }],
+      loadMode: true,
+      isLeafFn: () => false,
+      loadApi: () => [{ id: "child", label: "Child", type: "leaf" }]
+    });
+    const root = node(state, "root");
+    props.isLeafFn = (item) => item.type === "leaf";
+    await nextTick();
+    expect(node(state, "root")).toBe(root);
+    await state.loadNode(root);
+    expect(node(state, "child").isLeaf).toBe(true);
+    expect(state.isExpandable(node(state, "child"))).toBe(false);
   });
 });
